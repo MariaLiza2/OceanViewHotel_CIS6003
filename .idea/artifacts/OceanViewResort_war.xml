@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="OceanViewResort.war">
+    <output-path>$PROJECT_DIR$/out/artifacts/OceanViewResort_war</output-path>
+    <root id="archive" name="OceanViewResort.war.jar">
+      <element id="dir-copy" path="$PROJECT_DIR$/webapp" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="oceanviewhotel" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>

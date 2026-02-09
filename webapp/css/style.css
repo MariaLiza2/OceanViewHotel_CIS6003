@@ -1,0 +1,15 @@
+body, html {
+    height: 100%;
+    margin: 0;
+}
+
+.login-bg {
+    background: url('../images/hotel.jpg') no-repeat center center/cover;
+    height: 100vh;
+}
+
+.login-card {
+    width: 350px;
+    border-radius: 15px;
+    background-color: rgba(255, 255, 255, 0.9);
+}

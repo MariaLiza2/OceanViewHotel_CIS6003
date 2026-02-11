@@ -1,11 +1,16 @@
-<%@ page import="com.oceanview.model.User" %>
-<%
-    User user = (User) session.getAttribute("loggedUser");
-    if (user == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
-%>
+<form action="AdminLoginServlet" method="post">
+    <h2>Admin Login</h2>
+
+    Username:
+    <input type="text" name="username" required>
+
+    Password:
+    <input type="password" name="password" required>
+
+    <button type="submit">Login</button>
+
+    <p style="color:red">${error}</p>
+</form>
  <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 40px; }
         .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
@@ -18,27 +23,3 @@
         .btn-delete:hover { background: #e74c3c; color: white; }
         .add-form { margin-bottom: 20px; padding: 15px; background: #e8f4fd; border-radius: 5px; }
     </style>
-<html>
-<head>
-    <title>Dashboard</title>
-</head>
-<body>
-
-<h2>Welcome, <%= user.getUsername() %></h2>
-<p>Role: <%= user.getRole() %></p>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand">Ocean View Resort</a>
-  <ul class="navbar-nav">
-    <li class="nav-item"><a class="nav-link" href="dashboard.jsp">Home</a></li>
-    <li class="nav-item"><a class="nav-link" href="reservation.jsp">Reservation</a></li>
-    <li class="nav-item"><a class="nav-link" href="../viewReservations">Reservation Details</a></li>
-    <a href="admin-login.jsp">Admin Panel</a>
-
-    <li class="nav-item"><a class="nav-link" href="../logout">Logout</a></li>
-  </ul>
-</nav>
-
-<a href="logout">Logout</a>
-
-</body>
-</html>

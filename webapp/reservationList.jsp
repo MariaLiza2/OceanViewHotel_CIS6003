@@ -54,7 +54,7 @@
         </tbody>
     </table>
     <br>
-    <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn-custom">Back to Dashboard</a>
+    <a href="${pageContext.request.contextPath}/dashboard.jsp" class="btn-custom"> << Back to Dashboard</a>
 </div>
 </body>
 </html>

@@ -48,23 +48,47 @@ public class ReservationDAOImpl implements ReservationDAO {
     @Override
     public List<Reservation> getAllReservations() {
         List<Reservation> list = new ArrayList<>();
-        String sql = "SELECT * FROM Reservations";
+        // Note: Using the table name 'Reservations' as seen in your SSMS
+        String sql = "SELECT reservation_id, guest_name, room_type, check_in, check_out FROM Reservations";
 
         try (Connection con = DBConnection.getConnection();
-             Statement st = con.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-
-            if (con == null) return list;
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Reservation r = new Reservation();
                 r.setReservationId(rs.getInt("reservation_id"));
                 r.setGuestName(rs.getString("guest_name"));
-                // Note: Ensure your address and contact columns are handled if needed
                 r.setRoomType(rs.getString("room_type"));
                 r.setCheckIn(rs.getDate("check_in"));
                 r.setCheckOut(rs.getDate("check_out"));
+                list.add(r);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
+    @Override
+    public List<Reservation> searchReservationsByName(String name) {
+        List<Reservation> list = new ArrayList<>();
+        // SQL Server syntax for pattern matching
+        String sql = "SELECT * FROM Reservations WHERE guest_name LIKE ?";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, "%" + name + "%");
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Reservation r = new Reservation();
+                r.setReservationId(rs.getInt("reservation_id"));
+                r.setGuestName(rs.getString("guest_name"));
+                r.setRoomType(rs.getString("room_type"));
+                r.setCheckIn(rs.getDate("check_in"));
+                r.setCheckOut(rs.getDate("check_out"));
                 list.add(r);
             }
         } catch (SQLException e) {

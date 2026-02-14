@@ -22,6 +22,15 @@ public class ReservationServlet extends HttpServlet {
         List<Reservation> reservations = dao.getAllReservations();
         request.setAttribute("reservations", reservations);
         request.getRequestDispatcher("reservation.jsp").forward(request, response);
+        String checkIn = request.getParameter("checkIn");
+        String checkOut = request.getParameter("checkOut");
+
+        HttpSession session = request.getSession();
+        session.setAttribute("checkIn", request.getParameter("checkIn"));
+        session.setAttribute("checkOut", request.getParameter("checkOut"));
+
+        response.sendRedirect("rooms");
+
     }
 
     // POST method to handle form submission

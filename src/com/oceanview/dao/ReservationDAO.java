@@ -10,4 +10,7 @@ public interface ReservationDAO {
     boolean addReservation(Reservation r);
 
     List<Reservation> getAllReservations();
+
+    List<Reservation> searchReservationsByName(String name);
 }
+

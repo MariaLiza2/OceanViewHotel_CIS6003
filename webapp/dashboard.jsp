@@ -1,44 +1,45 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.oceanview.model.User" %>
 <%
     User user = (User) session.getAttribute("loggedUser");
-    if (user == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
+    if (user == null) { response.sendRedirect("login.jsp"); return; }
 %>
- <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 40px; }
-        .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
-        h2 { color: #333; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background-color: #3498db; color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #ddd; }
-        tr:hover { background-color: #f1f1f1; }
-        .btn-delete { color: #e74c3c; text-decoration: none; font-weight: bold; border: 1px solid #e74c3c; padding: 5px 10px; border-radius: 4px; }
-        .btn-delete:hover { background: #e74c3c; color: white; }
-        .add-form { margin-bottom: 20px; padding: 15px; background: #e8f4fd; border-radius: 5px; }
-    </style>
 <html>
 <head>
-    <title>Dashboard</title>
+    <title>Main Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
+<div class="main-container text-center">
+    <h2>Welcome, <%= user.getUsername() %></h2>
+    <p>Logged in as: <strong><%= user.getRole() %></strong></p>
 
-<h2>Welcome, <%= user.getUsername() %></h2>
-<p>Role: <%= user.getRole() %></p>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <a class="navbar-brand">Ocean View Resort</a>
-  <ul class="navbar-nav">
-    <li class="nav-item"><a class="nav-link" href="dashboard.jsp">Home</a></li>
-    <li class="nav-item"><a class="nav-link" href="reservation.jsp">Reservation</a></li>
-    <li class="nav-item"><a class="nav-link" href="../viewReservations">Reservation Details</a></li>
-    <a href="admin-login.jsp">Admin Panel</a>
+    <div class="card-grid">
+        <a href="reservation.jsp" class="nav-card">
 
-    <li class="nav-item"><a class="nav-link" href="../logout">Logout</a></li>
-  </ul>
-</nav>
+            <h4>Reservation</h4>
+        </a>
+        <a href="viewReservations" class="nav-card">
 
-<a href="logout">Logout</a>
+                    <h4>Reservation List</h4>
+                </a>
 
+    </div>
+ <div class="card-grid">
+        <a href="reservation.jsp" class="nav-card">
+
+            <h4>Help</h4>
+        </a>
+
+        <a href="admin-login.jsp" class="nav-card">
+
+            <h4>Admin Panel</h4>
+        </a>
+    </div>
+    <div class="mt-5">
+        <a href="logout" class="btn btn-danger">Logout</a>
+    </div>
+</div>
 </body>
 </html>

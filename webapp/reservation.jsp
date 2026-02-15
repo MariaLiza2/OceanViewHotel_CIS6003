@@ -54,9 +54,9 @@
                             </div>
                         </div>
 
-                        <div class="mt-4">
-                            <button type="submit" class="btn btn-success w-100">Confirm Reservation</button>
-                        </div>
+                       <form action="${pageContext.request.contextPath}/addReservation" method="post">
+                           <button type="submit" class="btn-custom">Confirm Reservation</button>
+                       </form>
 
                     </form>
                 </div>

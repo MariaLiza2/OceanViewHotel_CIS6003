@@ -14,32 +14,43 @@ import java.util.List;
 @WebServlet("/addReservation")
 public class ReservationServlet extends HttpServlet {
 
-    // GET method to display the list of reservations
+    /**
+     * GET method: Fetches all data and displays the History List.
+     * This is triggered after a successful redirect from doPost.
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // 1. Initialize DAO to fetch data
         ReservationDAO dao = new ReservationDAOImpl();
-        List<Reservation> reservations = dao.getAllReservations();
+
+        // 2. Get search parameter (if any)
+        String searchName = request.getParameter("searchName");
+        List<Reservation> reservations;
+
+        if (searchName != null && !searchName.trim().isEmpty()) {
+            reservations = dao.searchReservationsByName(searchName);
+        } else {
+            reservations = dao.getAllReservations();
+        }
+
+        // 3. Set the list as a request attribute
         request.setAttribute("reservations", reservations);
-        request.getRequestDispatcher("reservation.jsp").forward(request, response);
-        String checkIn = request.getParameter("checkIn");
-        String checkOut = request.getParameter("checkOut");
 
-        HttpSession session = request.getSession();
-        session.setAttribute("checkIn", request.getParameter("checkIn"));
-        session.setAttribute("checkOut", request.getParameter("checkOut"));
-
-        response.sendRedirect("rooms");
-
+        // 4. Forward to the history JSP page
+        request.getRequestDispatcher("reservationList.jsp").forward(request, response);
     }
 
-    // POST method to handle form submission
+    /**
+     * POST method: Processes the registration form and saves to DB.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         try {
-            // 1. Capture parameters from the JSP form
+            // 1. Capture parameters from the registration form
             String name = request.getParameter("guestName");
             String address = request.getParameter("address");
             String contact = request.getParameter("contactNumber");
@@ -54,7 +65,7 @@ public class ReservationServlet extends HttpServlet {
             r.setContactNumber(contact);
             r.setRoomType(roomType);
 
-            // 3. Parse Dates (HTML5 date input sends yyyy-MM-dd)
+            // 3. Parse Dates
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             if (checkInStr != null && !checkInStr.isEmpty()) {
                 r.setCheckIn(sdf.parse(checkInStr));
@@ -63,16 +74,17 @@ public class ReservationServlet extends HttpServlet {
                 r.setCheckOut(sdf.parse(checkOutStr));
             }
 
-            // 4. Call the DAO to save to SQL Server 2014
+            // 4. Call the DAO to save the record (includes reservation_number generation)
             ReservationDAO dao = new ReservationDAOImpl();
             boolean success = dao.addReservation(r);
 
             if (success) {
-
-                // Redirect to the GET method to refresh the list
-                response.sendRedirect(request.getContextPath() + "/rooms");
+                // 5. Success: Redirect to the GET method to view the History List
+                // This fulfills your requirement to go to Reservation History
+                response.sendRedirect(request.getContextPath() + "/addReservation");
             } else {
-                request.setAttribute("errorMessage", "Database insertion failed. Check console.");
+                // 6. Failure: Return to form with error
+                request.setAttribute("errorMessage", "Database insertion failed. Please try again.");
                 request.getRequestDispatcher("reservation_form.jsp").forward(request, response);
             }
 

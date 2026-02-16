@@ -1,73 +1,71 @@
 package com.oceanview.controller;
 
 import com.oceanview.model.Bill;
-
-
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 
 @WebServlet("/billing")
 public class BillingServlet extends HttpServlet {
 
-    @Override
+    // GET: Triggered by the "Billing" button in Reservation History
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        String type = request.getParameter("type");
-        String rateStr = request.getParameter("rate");
-
-        if (rateStr == null || rateStr.trim().isEmpty()) {
-            response.sendRedirect("ManageRoomsServlet");
-            return;
-        }
-
-        double rate = Double.parseDouble(rateStr);
+        String resId = request.getParameter("resId");
+        String roomType = request.getParameter("type"); // Ensure this name matches your list link
 
         Bill bill = new Bill();
-        bill.setRoomType(type);
+        if(resId != null) bill.setReservationId(Integer.parseInt(resId));
+        bill.setRoomType(roomType != null ? roomType : "Standard");
+
+        // Set default rates
+        double rate = 2500.0;
+        if("Double".equalsIgnoreCase(roomType)) rate = 4500.0;
+        else if("Luxury".equalsIgnoreCase(roomType)) rate = 8500.0;
+
         bill.setAmountPerDay(rate);
-        bill.setDays(1);
 
         request.setAttribute("bill", bill);
         request.getRequestDispatcher("billing.jsp").forward(request, response);
     }
-    @Override
+
+    // POST: Triggered by "Confirm Payment" button in billing.jsp
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Get form values
-        String daysStr = request.getParameter("days");
-        String amountStr = request.getParameter("amount");
+        try {
+            // Retrieve parameters safely
+            String resIdStr = request.getParameter("reservationId");
+            String totalStr = request.getParameter("totalAmount");
+            String roomType = request.getParameter("roomType");
+            String daysStr = request.getParameter("days");
 
-        long days = 1;
-        double amount = 0;
+            // Avoid NullPointerException with a check
+            if (resIdStr == null || totalStr == null) {
+                throw new Exception("Missing parameters for billing.");
+            }
 
-        if (daysStr != null) {
-            days = Long.parseLong(daysStr);
+            Bill bill = new Bill();
+            bill.setReservationId(Integer.parseInt(resIdStr));
+            bill.setRoomType(roomType);
+            bill.setDays(Integer.parseInt(daysStr));
+            bill.setTotal(Double.parseDouble(totalStr));
+
+            // Generate a random receipt number
+            String receiptNo = "OVH-" + System.currentTimeMillis() / 1000;
+
+            // Save to Session so paymentSuccess.jsp can read it
+            HttpSession session = request.getSession();
+            session.setAttribute("bill", bill);
+            session.setAttribute("receiptNo", receiptNo);
+
+            // Forward to success page
+            request.getRequestDispatcher("payment-success.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.sendRedirect("addReservation"); // Redirect on error
         }
-
-        if (amountStr != null) {
-            amount = Double.parseDouble(amountStr);
-        }
-
-        // Calculate total
-        double total = days * amount;
-
-        // Create Bill object
-        Bill bill = new Bill();
-        bill.setDays(days);
-        bill.setAmountPerDay(amount);
-        bill.setTotal(total);
-
-        // Send result to confirmation page
-        request.setAttribute("bill", bill);
-
-        request.getRequestDispatcher("payment-success.jsp")
-                .forward(request, response);
     }
-
 }

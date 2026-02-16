@@ -1,6 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List, com.oceanview.model.Reservation" %>
-
+<%!
+    // This is a JSP Declaration block (note the ! symbol)
+    public double getRate(String type) {
+        if ("Double".equalsIgnoreCase(type)) return 4500.0;
+        if ("Luxury".equalsIgnoreCase(type)) return 8500.0;
+        return 2500.0;
+    }
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -47,10 +54,8 @@
                     <td><%= r.getRoomType() %></td>
                     <td><%= r.getCheckIn() %></td>
                     <td>
-                        <a href="billing?resId=<%= r.getReservationId() %>&roomType=<%= r.getRoomType() %>"
-                           style="background: #27ae60; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-weight: bold;">
-                           Generate Bill
-                        </a>
+                        <a href="billing?resId=<%= r.getReservationId() %>&type=<%= r.getRoomType() %>&rate=<%= getRate(r.getRoomType()) %>"
+                           class="btn btn-sm btn-success">Billing</a>
                     </td>
                 </tr>
             <%

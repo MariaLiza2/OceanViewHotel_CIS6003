@@ -25,23 +25,30 @@ public class BillingServlet extends HttpServlet {
             return;
         }
 
-        // Normal billing page
+        String resId = request.getParameter("resId");
         String type = request.getParameter("type");
-        String rateStr = request.getParameter("rate");
+        String resNum = request.getParameter("resNum");
 
-        if (rateStr == null || rateStr.trim().isEmpty()) {
-            response.sendRedirect("ManageRoomsServlet");
+        // 1. Safety check
+        if (resId == null || type == null) {
+            response.sendRedirect("viewReservations");
             return;
         }
 
-        double rate = Double.parseDouble(rateStr);
+        // 2. Determine price based on room type
+        double rate = 2500.0; // Default
+        if ("Double".equalsIgnoreCase(type)) rate = 4500.0;
+        else if ("Luxury".equalsIgnoreCase(type)) rate = 8500.0;
 
+        // 3. Create the Bill object with the guest's specific data
         Bill bill = new Bill();
+        bill.setReservationId(Integer.parseInt(resId));
         bill.setRoomType(type);
         bill.setAmountPerDay(rate);
-        bill.setDays(1);
 
+        // 4. Send this "pre-filled" bill to the billing page
         request.setAttribute("bill", bill);
+        request.setAttribute("resNum", resNum);
         request.getRequestDispatcher("billing.jsp").forward(request, response);
     }
 
@@ -60,7 +67,8 @@ public class BillingServlet extends HttpServlet {
         double amount = Double.parseDouble(amountStr);
         double total = days * amount;
 
-        String receiptNo = "OVH-" + System.currentTimeMillis();
+        String resIdStr = request.getParameter("reservationId");
+        String receiptNo = "OVH-REC-" + String.format("%03d", Integer.parseInt(resIdStr));
 
         Bill bill = new Bill();
         bill.setRoomType(roomType);

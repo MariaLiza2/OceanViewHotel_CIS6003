@@ -54,9 +54,12 @@
                     <td><%= r.getRoomType() %></td>
                     <td><%= r.getCheckIn() %></td>
                     <td>
-                        <a href="billing?resId=<%= r.getReservationId() %>&type=<%= r.getRoomType() %>&rate=<%= getRate(r.getRoomType()) %>"
-                           class="btn btn-sm btn-success">Billing</a>
-                    </td>
+
+                       <td>
+                           <%-- Inside your reservation list loop --%>
+                           <a href="billing?resId=<%= r.getReservationId() %>&resNum=<%= r.getReservationNumber() %>&type=<%= r.getRoomType() %>"
+                              class="btn btn-sm btn-success">Billing</a>
+                       </td>
                 </tr>
             <%
                     } // End of for loop

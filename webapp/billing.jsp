@@ -39,21 +39,32 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
+            <%-- Inside billing.jsp inside the <form> --%>
+
                 <form action="billing" method="post">
-                    <input type="hidden" name="reservationId" value="<%= bill.getReservationId() %>">
+
                     <input type="hidden" name="roomType" value="<%= bill.getRoomType() %>">
                     <input type="hidden" name="totalAmount" id="totalAmountHidden" value="">
+                    <input type="hidden" name="reservationId" value="${bill.reservationId}">
+                        <input type="hidden" name="resNum" value="${resNum}">
 
                     <div class="card shadow border-0">
-                        <div class="card-header bg-dark text-white p-3 text-center">
-                            <h4 class="mb-0">Invoice Generation</h4>
-                            <small>Res ID: #<%= bill.getReservationId() %></small>
-                        </div>
+                       <div class="card-header bg-dark text-white p-3 text-center">
+                           <h4 class="mb-0">Invoice Generation</h4>
+                           <small>Reservation Number: ${resNum != null ? resNum : bill.reservationId}</small>
+                       </div>
                         <div class="card-body p-4">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Room Category</label>
                                 <input type="text" class="form-control bg-light" value="<%= bill.getRoomType() %>" readonly>
                             </div>
+                            <input type="hidden" name="reservationId" value="${bill.reservationId}">
+                                            <input type="hidden" name="roomType" value="${bill.roomType}">
+
+                                            <div class="mb-3">
+                                                <label>Room Category:</label>
+                                                <input type="text" class="form-control" value="${bill.roomType}" readonly>
+                                            </div>
 
                             <div class="row">
                                 <div class="col-6 mb-3">

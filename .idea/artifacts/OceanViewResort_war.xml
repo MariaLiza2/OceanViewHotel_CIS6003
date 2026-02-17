@@ -7,6 +7,10 @@
         <element id="directory" name="classes">
           <element id="module-output" name="oceanviewhotel" />
         </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="mssql-jdbc-13.2.1.jre8" />
+          <element id="file-copy" path="$PROJECT_DIR$/../../../../Downloads/itextpdf-5.5.13.3.jar" />
+        </element>
       </element>
     </root>
   </artifact>

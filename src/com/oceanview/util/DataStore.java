@@ -11,10 +11,13 @@ public class DataStore {
     private List<Room> rooms = new ArrayList<>();
 
     private DataStore() {
-        rooms.add(new Room("Single", true));
-        rooms.add(new Room("Double", true));
-        rooms.add(new Room("Suite", false));
+
+        rooms.add(new Room("Deluxe", 35000.0, true));
+        rooms.add(new Room("Single", 15000.0, true));
+        rooms.add(new Room("Double", 22000.0, true));
+        rooms.add(new Room("Suite", 40000.0, false));
     }
+
 
     public static DataStore getInstance() {
         if (instance == null) instance = new DataStore();

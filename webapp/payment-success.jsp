@@ -26,15 +26,16 @@
     <p><strong>Room:</strong> <%= bill.getRoomType() %></p>
     <p><strong>Total Paid:</strong> LKR <%= bill.getTotal() %></p>
 
-    <a href="billing?action=download" class="btn btn-success mt-3">
-        Download Receipt
-    </a>
+    <div class="mt-4">
+        <a href="billing?action=download&resId=${bill.reservationId}" class="btn btn-outline-primary">
+            <i class="fas fa-download"></i> Download Receipt (PDF)
+        </a>
+        <a href="viewReservations" class="btn btn-secondary">Back to List</a>
+    </div>
 
     <br><br>
 
-    <a href="ManageRoomsServlet" class="btn btn-primary">
-        Back to Rooms
-    </a>
+
 </div>
 
 </body>

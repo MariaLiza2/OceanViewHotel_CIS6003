@@ -1,59 +1,31 @@
 package com.oceanview.model;
 
 public class Bill {
-
+    private int reservationId;
     private String roomType;
-    private long days;
-    private long nights;
     private double amountPerDay;
-    private double total;
+    private int days;    // Use int for days
+    private double total; // Use double for currency
 
-    // ---------- GETTERS ----------
+    // Reservation ID
+    public int getReservationId() { return reservationId; }
+    public void setReservationId(int reservationId) { this.reservationId = reservationId; }
 
-    public String getRoomType() {
-        return roomType;
-    }
+    // Room Type
+    public String getRoomType() { return roomType; }
+    public void setRoomType(String roomType) { this.roomType = roomType; }
 
-    public long getDays() {
-        return days;
-    }
+    // Amount Per Day
+    public double getAmountPerDay() { return amountPerDay; }
+    public void setAmountPerDay(double amountPerDay) { this.amountPerDay = amountPerDay; }
 
-    public long getNights() {
-        return nights;
-    }
+    // Days - Fixed to return int and accept int
+    public int getDays() { return days; }
+    public void setDays(int days) { this.days = days; }
 
-    public double getAmountPerDay() {
-        return amountPerDay;
-    }
+    // Total - Fixed to return double and accept double
+    public double getTotal() { return total; }
+    public void setTotal(double total) { this.total = total; }
 
-    public double getTotal() {
-        return total;
-    }
 
-    // ---------- SETTERS ----------
-
-    public void setRoomType(String roomType) {
-        this.roomType = roomType;
-    }
-
-    public void setDays(long days) {
-        this.days = days;
-    }
-
-    public void setNights(long nights) {
-        this.nights = nights;
-    }
-
-    public void setAmountPerDay(double amountPerDay) {
-        this.amountPerDay = amountPerDay;
-    }
-
-    public void setTotal(double total) {
-        this.total = total;
-    }
-
-    // Optional helper method (auto calculate total)
-    public void calculateTotal() {
-        this.total = this.amountPerDay * this.days;
-    }
 }

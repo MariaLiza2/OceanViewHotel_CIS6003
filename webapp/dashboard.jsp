@@ -32,11 +32,22 @@
                 <h4>Billing/Check-out</h4>
             </a>
 
-            <a href="admin-login.jsp" class="nav-card">
+            <a href="viewPayments" class="nav-card">
 
                 <h4>Payment details</h4>
             </a>
         </div>
+        <div class="card-grid">
+                     <a href="rooms" class="nav-card">
+
+                        <h4>Room availability</h4>
+                    </a>
+
+                    <a href="viewPayments" class="nav-card">
+
+                        <h4>Payment details</h4>
+                    </a>
+                </div>
  <div class="card-grid">
         <a href="reservation.jsp" class="nav-card">
 

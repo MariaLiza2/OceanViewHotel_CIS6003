@@ -1,61 +1,71 @@
 <%@ page import="java.util.*, com.oceanview.model.Room" %>
-
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>Room Availability</title>
+    <title>Room Availability | Ocean View Hotel</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-</head>
-<body class="container">
-
-<h2>Room Availability</h2>
-
-<table class="table table-bordered">
-<tr>
-    <th>Room Type</th>
-    <th>Status</th>
-    <th>Action</th>
-</tr>
-
-<%
-    List<Room> rooms = (List<Room>) request.getAttribute("rooms");
-    if(rooms != null){
-        for(Room r : rooms){
-%>
-<tr>
-    <td><%= r.getType() %></td>
-    <td><%= r.isAvailable() ? "Available" : "Booked" %></td>
-    <td>
-        <% if(r.isAvailable()) { %>
-            <a href="billing?type=<%= r.getType() %>&rate=<%= r.getRate() %>"
-               class="btn btn-primary">
-               Billing
-            </a>
-
-        <% } else { %>
-            <button class="btn btn-danger" disabled>Not Available</button>
-        <% } %>
-    </td>
-</tr>
-
-
-<%
-        }
-    }
-%>
-</table>
-
-<style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 40px; }
-        .container { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 800px; margin: auto; }
-        h2 { color: #333; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background-color: #3498db; color: white; padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #ddd; }
-        tr:hover { background-color: #f1f1f1; }
-        .btn-delete { color: #e74c3c; text-decoration: none; font-weight: bold; border: 1px solid #e74c3c; padding: 5px 10px; border-radius: 4px; }
-        .btn-delete:hover { background: #e74c3c; color: white; }
-        .add-form { margin-bottom: 20px; padding: 15px; background: #e8f4fd; border-radius: 5px; }
+    <style>
+        .table-header { background-color: #4da3ff; color: white; }
+        .page-title { color: #2c3e50; border-bottom: 3px solid #4da3ff; padding-bottom: 10px; font-weight: bold; }
+        .badge-available { background-color: #2ecc71; color: white; }
+        .badge-booked { background-color: #e74c3c; color: white; }
     </style>
+</head>
+<body class="bg-light">
 
+<div class="container mt-5 p-4 bg-white shadow-sm rounded">
+    <h2 class="page-title mb-4">Room Availability</h2>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-header">
+                <tr>
+                    <th class="ps-3">Room Type</th>
+                    <th>Daily Rate (LKR)</th>
+                    <th>Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%
+                    List<Room> rooms = (List<Room>) request.getAttribute("rooms");
+                    if(rooms != null && !rooms.isEmpty()){
+                        for(Room r : rooms){
+                %>
+                <tr>
+                    <td class="ps-3 fw-bold text-primary"><%= r.getType() %></td>
+                    <td>LKR <%= r.getRate() %></td>
+                    <td>
+                        <% if(r.isAvailable()) { %>
+                            <span class="badge rounded-pill badge-available">Available</span>
+                        <% } else { %>
+                            <span class="badge rounded-pill badge-booked">Booked</span>
+                        <% } %>
+                    </td>
+                    <td class="text-center">
+                        <% if(r.isAvailable()) { %>
+                            <a href="reservation.jsp?type=<%= r.getType() %>&rate=<%= r.getRate() %>"
+                               class="btn btn-sm btn-outline-primary px-4">
+                               Make Reservation
+                            </a>
+                        <% } else { %>
+                            <button class="btn btn-sm btn-secondary px-4" disabled>Occupied</button>
+                        <% } %>
+                    </td>
+                </tr>
+                <%
+                        }
+                    } else {
+                %>
+                <tr><td colspan="4" class="text-center py-4 text-muted">No rooms currently in the system.</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-3">
+        <a href="dashboard.jsp" class="btn btn-link text-decoration-none">← Back to Dashboard</a>
+    </div>
+</div>
 </body>
 </html>

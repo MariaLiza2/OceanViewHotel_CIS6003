@@ -43,15 +43,15 @@
                         <h4>Room availability</h4>
                     </a>
 
-                    <a href="viewPayments" class="nav-card">
+                    <a href="register.jsp" class="nav-card">
 
-                        <h4>Payment details</h4>
+                        <h4>Registered users</h4>
                     </a>
                 </div>
  <div class="card-grid">
-        <a href="reservation.jsp" class="nav-card">
+        <a href="staff-guide.jsp" class="nav-card">
 
-            <h4>Help</h4>
+            <h4>Help Guide</h4>
         </a>
 
         <a href="admin-login.jsp" class="nav-card">

@@ -1,5 +1,7 @@
 package com.oceanview.controller;
 
+import com.oceanview.model.Guest;
+import com.oceanview.dao.GuestDAO;
 import com.oceanview.model.Reservation;
 import com.oceanview.dao.ReservationDAO;
 import com.oceanview.dao.ReservationDAOImpl;
@@ -53,10 +55,16 @@ public class ReservationServlet extends HttpServlet {
             // 1. Capture parameters from the registration form
             String name = request.getParameter("guestName");
             String address = request.getParameter("address");
-            String contact = request.getParameter("contactNumber");
+            String contact = request.getParameter("contactNumber"); // Ensure this matches your form name
             String roomType = request.getParameter("roomType");
             String checkInStr = request.getParameter("checkIn");
             String checkOutStr = request.getParameter("checkOut");
+
+            // --- NEW: GUEST DIRECTORY LOGIC ---
+            // We save the guest identity first. GuestDAO.saveGuest handles duplicate checks.
+            Guest newGuest = new Guest(name, contact, address);
+            GuestDAO.saveGuest(newGuest);
+            // ----------------------------------
 
             // 2. Map form data to the Reservation Model
             Reservation r = new Reservation();
@@ -74,17 +82,15 @@ public class ReservationServlet extends HttpServlet {
                 r.setCheckOut(sdf.parse(checkOutStr));
             }
 
-            // 4. Call the DAO to save the record (includes reservation_number generation)
+            // 4. Call the DAO to save the reservation record
             ReservationDAO dao = new ReservationDAOImpl();
             boolean success = dao.addReservation(r);
 
             if (success) {
-                // 5. Success: Redirect to the GET method to view the History List
-                // This fulfills your requirement to go to Reservation History
+                // Success: Redirect to view history
                 response.sendRedirect(request.getContextPath() + "/addReservation");
             } else {
-                // 6. Failure: Return to form with error
-                request.setAttribute("errorMessage", "Database insertion failed. Please try again.");
+                request.setAttribute("errorMessage", "Database insertion failed.");
                 request.getRequestDispatcher("reservation_form.jsp").forward(request, response);
             }
 
@@ -92,5 +98,4 @@ public class ReservationServlet extends HttpServlet {
             e.printStackTrace();
             throw new ServletException("Error processing reservation: " + e.getMessage());
         }
-    }
-}
+    }}

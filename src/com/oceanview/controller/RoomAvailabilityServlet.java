@@ -1,5 +1,6 @@
 package com.oceanview.controller;
 
+import com.oceanview.dao.RoomDAO;
 import com.oceanview.model.Reservation;
 import com.oceanview.model.Room;
 import com.oceanview.service.ReservationService;
@@ -16,13 +17,13 @@ import java.util.List;
 
 @WebServlet("/rooms")
 public class RoomAvailabilityServlet extends HttpServlet {
-
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<Room> rooms = DataStore.getInstance().getRooms();
-        request.setAttribute("rooms", rooms);
+        // CHANGE THIS: Instead of DataStore, use the DAO to get real DB data
+        List<Room> rooms = RoomDAO.getAllRooms();
 
+        request.setAttribute("rooms", rooms);
         request.getRequestDispatcher("rooms.jsp").forward(request, response);
     }
 }

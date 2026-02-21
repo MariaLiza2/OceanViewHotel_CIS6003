@@ -44,8 +44,15 @@
             <input type="text" name="roomType" id="roomTypeField" placeholder="Room Type" required>
             <input type="number" name="rate" id="rateField" placeholder="Rate (LKR)" required>
 
+            <input type="text" name="description" id="descriptionField" placeholder="Description" required>
+
+            <select name="isAvailable" id="statusField">
+                <option value="true">Available</option>
+                <option value="false">Booked</option>
+            </select>
+
             <button type="submit" id="submitBtn" class="btn-add">Add Room</button>
-            <a href="ManageRoomsServlet" style="font-size: 12px; color: gray; margin-left: 10px;">Clear</a>
+            <a href="ManageRoomsServlet" style="font-size: 12px; color: gray; margin-left: 10px;">Clear/Reset</a>
         </form>
     </div>
 
@@ -55,6 +62,7 @@
                 <th>ID</th>
                 <th>Room Type</th>
                 <th>Rate (LKR)</th>
+                <th>Description</th> <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -68,24 +76,26 @@
                     <td><%= r.getRoomId() %></td>
                     <td><%= r.getType() %></td>
                     <td><%= r.getRate() %></td>
+                    <td><%= r.getDescription() %></td> <td>
+                        <a href="ManageRoomsServlet?action=toggle&id=<%= r.getRoomId() %>&currentStatus=<%= r.isAvailable() %>"
+                           style="text-decoration:none; color: <%= r.isAvailable() ? "#27ae60" : "#e74c3c" %>; font-weight:bold;">
+                            <%= r.isAvailable() ? "Available" : "Booked" %>
+                        </a>
+                    </td>
                    <td>
                        <a href="javascript:void(0)" class="btn-edit"
-                          onclick="prepareEdit('<%= r.getRoomId() %>', '<%= r.getType() %>', '<%= r.getRate() %>')">Edit</a>
-
+                          onclick="prepareEdit('<%= r.getRoomId() %>', '<%= r.getType() %>', '<%= r.getRate() %>', '<%= r.getDescription() %>', '<%= r.isAvailable() %>')">Edit</a>
                        &nbsp;|&nbsp;
-
                        <a href="ManageRoomsServlet?action=delete&id=<%= r.getRoomId() %>"
                           class="btn-delete" onclick="return confirm('Delete this room?')">Delete</a>
                    </td>
                 </tr>
-            <%
-                    }
-                } else {
-            %>
-                <tr><td colspan="4" style="text-align:center;">No rooms found in database.</td></tr>
+            <% } } else { %>
+                <tr><td colspan="6" style="text-align:center;">No rooms found in database.</td></tr>
             <% } %>
         </tbody>
     </table>
+</div>
     <br>
     <a href="admin-dashboard.jsp" style="text-decoration: none; color: #3498db;">&larr; Back to Admin Panel</a>
 </div>

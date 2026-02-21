@@ -24,13 +24,17 @@ public class ManageRoomsServlet extends HttpServlet {
             if ("add".equals(action)) {
                 String type = request.getParameter("roomType");
                 String rateStr = request.getParameter("rate");
-                if (type != null && rateStr != null) {
+                String desc = request.getParameter("description"); // New
+                String statusStr = request.getParameter("isAvailable"); // New dropdown value
+
+                if (type != null && rateStr != null && desc != null) {
                     double rate = Double.parseDouble(rateStr);
-                    RoomDAO.addRoom(type, rate);
+                    boolean isAvailable = Boolean.parseBoolean(statusStr);
+                    // Updated DAO call to include description and initial status
+                    RoomDAO.addRoom(type, rate, desc, isAvailable);
                 }
 
             } else if ("delete".equals(action)) {
-                // Get the ID of the room to delete
                 String idStr = request.getParameter("id");
                 if (idStr != null) {
                     int id = Integer.parseInt(idStr);
@@ -38,26 +42,38 @@ public class ManageRoomsServlet extends HttpServlet {
                 }
 
             } else if ("update".equals(action)) {
-                // Get data for the updated room
                 String idStr = request.getParameter("roomId");
                 String type = request.getParameter("roomType");
                 String rateStr = request.getParameter("rate");
+                String desc = request.getParameter("description"); // New
+                String statusStr = request.getParameter("isAvailable"); // New
 
                 if (idStr != null && type != null && rateStr != null) {
                     int id = Integer.parseInt(idStr);
                     double rate = Double.parseDouble(rateStr);
-                    RoomDAO.updateRoom(id, type, rate);
+                    boolean isAvailable = Boolean.parseBoolean(statusStr);
+                    // Updated DAO call to save changes to description and status
+                    RoomDAO.updateRoom(id, type, rate, desc, isAvailable);
+                }
+
+            } else if ("toggle".equals(action)) {
+                String idStr = request.getParameter("id");
+                String currentStatusStr = request.getParameter("currentStatus");
+
+                if (idStr != null && currentStatusStr != null) {
+                    int id = Integer.parseInt(idStr);
+                    boolean newStatus = !Boolean.parseBoolean(currentStatusStr);
+                    RoomDAO.toggleRoomStatus(id, newStatus);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // After any action (Add, Delete, or Update), refresh the list
+        // Always redirect or forward correctly after processing
         if (action != null) {
             response.sendRedirect("ManageRoomsServlet");
         } else {
-            // Default: Load the table
             List<Room> rooms = RoomDAO.getAllRooms();
             request.setAttribute("rooms", rooms);
             request.getRequestDispatcher("manage-rooms.jsp").forward(request, response);
@@ -68,4 +84,5 @@ public class ManageRoomsServlet extends HttpServlet {
             throws ServletException, IOException {
         doGet(request, response);
     }
+
 }

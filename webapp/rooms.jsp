@@ -1,5 +1,6 @@
 <%@ page import="java.util.*, com.oceanview.model.Room" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <html>
 <head>
     <title>Room Availability | Ocean View Hotel</title>
@@ -63,9 +64,9 @@
         </table>
     </div>
 
-    <div class="mt-3">
-        <a href="dashboard.jsp" class="btn btn-link text-decoration-none">← Back to Dashboard</a>
-    </div>
+    <div class="mt-4">
+            <a href="dashboard.jsp" class="btn btn-outline-secondary">Back to Dashboard</a>
+        </div>
 </div>
 </body>
 </html>

@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <!DOCTYPE html>
 <html>
 <head>
@@ -111,9 +112,9 @@
         <strong>Download & Print Receipt:</strong> Click <strong>Download Receipt</strong> and provide a physical copy to the guest.
     </div>
 
-    <div style="text-align: center;">
-        <a href="dashboard.jsp" class="btn-dashboard">Return to Dashboard</a>
-    </div>
+    <div class="mt-4">
+            <a href="dashboard.jsp" class="btn btn-outline-secondary">Back to Dashboard</a>
+        </div>
 </div>
 
 </body>

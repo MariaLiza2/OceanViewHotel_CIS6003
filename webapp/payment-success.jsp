@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.oceanview.model.Bill" %>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <%
     Bill bill = (Bill) session.getAttribute("bill");
     String receiptNo = (String) session.getAttribute("receiptNo");
@@ -32,7 +33,9 @@
         </a>
         <a href="viewReservations" class="btn btn-secondary">Back to List</a>
     </div>
-
+<div class="mt-4">
+        <a href="dashboard.jsp" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
     <br><br>
 
 

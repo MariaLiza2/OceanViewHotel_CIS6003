@@ -43,7 +43,7 @@
                         <h4>Room availability</h4>
                     </a>
 
-                    <a href="register.jsp" class="nav-card">
+                    <a href="registered-guests.jsp" class="nav-card">
 
                         <h4>Registered users</h4>
                     </a>

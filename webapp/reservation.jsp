@@ -57,7 +57,9 @@
                        <form action="${pageContext.request.contextPath}/addReservation" method="post">
                            <button type="submit" class="btn-custom">Confirm Reservation</button>
                        </form>
-
+<div class="mt-4">
+        <a href="dashboard.jsp" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
                     </form>
                 </div>
             </div>

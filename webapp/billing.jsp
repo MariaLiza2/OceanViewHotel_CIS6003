@@ -58,13 +58,7 @@
                                 <label class="form-label fw-bold">Room Category</label>
                                 <input type="text" class="form-control bg-light" value="<%= bill.getRoomType() %>" readonly>
                             </div>
-                            <input type="hidden" name="reservationId" value="${bill.reservationId}">
-                                            <input type="hidden" name="roomType" value="${bill.roomType}">
 
-                                            <div class="mb-3">
-                                                <label>Room Category:</label>
-                                                <input type="text" class="form-control" value="${bill.roomType}" readonly>
-                                            </div>
 
                             <div class="row">
                                 <div class="col-6 mb-3">

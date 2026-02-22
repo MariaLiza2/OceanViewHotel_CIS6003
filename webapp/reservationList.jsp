@@ -37,7 +37,7 @@
                 <th>Res. Number</th>
                 <th>Guest Name</th>
                 <th>Room Type</th>
-                <th>Check In</th>
+                <th>Check In</th><th>Check Out</th>
                 <th>Action</th>
             </tr>
         </thead>
@@ -53,7 +53,7 @@
                     <td><%= r.getGuestName() %></td>
                     <td><%= r.getRoomType() %></td>
                     <td><%= r.getCheckIn() %></td>
-                    <td>
+                    <<td><%= r.getCheckOut() %></td>
 
                        <td>
                            <%-- Inside your reservation list loop --%>

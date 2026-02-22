@@ -38,9 +38,9 @@ public class BillingServlet extends HttpServlet {
         }
 
         // 2. Determine price based on room type
-        double rate = 2500.0; // Default
-        if ("Double".equalsIgnoreCase(type)) rate = 4500.0;
-        else if ("Luxury".equalsIgnoreCase(type)) rate = 8500.0;
+        double rate = 25000.0; // Default
+        if ("Double".equalsIgnoreCase(type)) rate = 45000.0;
+        else if ("Luxury".equalsIgnoreCase(type)) rate = 85000.0;
 
         // 3. Create the Bill object with the guest's specific data
         Bill bill = new Bill();
@@ -121,12 +121,16 @@ public class BillingServlet extends HttpServlet {
             throws IOException {
 
         HttpSession session = request.getSession();
-        // Retrieving the bill and the formatted reservation number from session
+
+// Retrieving the bill and the formatted reservation number from session
+
         Bill bill = (Bill) session.getAttribute("bill");
+
         String resNum = (String) session.getAttribute("resNum"); // This is the OVH-001 format
+
         String receiptNo = (String) session.getAttribute("receiptNo");
 
-        // Redirect if no data is found to prevent empty PDF errors
+
         if (bill == null) {
             response.sendRedirect("viewReservations");
             return;
@@ -142,36 +146,72 @@ public class BillingServlet extends HttpServlet {
 
             document.open();
 
-            // Adding Header Info
-            document.add(new com.itextpdf.text.Paragraph("Ocean View Hotel - Official Receipt"));
-            document.add(new com.itextpdf.text.Paragraph("-----------------------------------------"));
+            // 1. Header Section (Title and Business Name)
+            com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 22, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.BLUE);
+            com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("RECEIPT", titleFont);
+            title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
+            document.add(title);
+            document.add(new com.itextpdf.text.Paragraph("Ocean View Hotel", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD)));
+            document.add(new com.itextpdf.text.Paragraph("123 Beach Road, Negombo, Sri Lanka"));
             document.add(new com.itextpdf.text.Paragraph(" "));
 
-            // Displaying the Reservation Number (OVH format)
-            document.add(new com.itextpdf.text.Paragraph("Reservation Number: " + (resNum != null ? resNum : "N/A")));
-            document.add(new com.itextpdf.text.Paragraph("Receipt Reference: " + receiptNo));
+            // 2. Info Table (Receipt # and Date)
+            com.itextpdf.text.pdf.PdfPTable infoTable = new com.itextpdf.text.pdf.PdfPTable(2);
+            infoTable.setWidthPercentage(100);
+            infoTable.addCell(getNoBorderCell("RECEIPT #: " + receiptNo));
+            infoTable.addCell(getNoBorderCell("DATE: " + new java.util.Date().toString()));
+            infoTable.addCell(getNoBorderCell("RESERVATION NO: " + (resNum != null ? resNum : "N/A"))); // Fixes N/A issue
+            infoTable.addCell(getNoBorderCell(" "));
+            document.add(infoTable);
             document.add(new com.itextpdf.text.Paragraph(" "));
 
-            // Billing Details
-            document.add(new com.itextpdf.text.Paragraph("Room Category: " + bill.getRoomType()));
-            document.add(new com.itextpdf.text.Paragraph("Stay Duration: " + bill.getDays() + " Day(s)"));
-            document.add(new com.itextpdf.text.Paragraph("Daily Rate: LKR " + bill.getAmountPerDay()));
+            // 3. Billing Table (The main table from your layout)
+            com.itextpdf.text.pdf.PdfPTable table = new com.itextpdf.text.pdf.PdfPTable(4);
+            table.setWidthPercentage(100);
+            table.setWidths(new float[]{3f, 1.5f, 1f, 1.5f});
+
+            // Blue Table Header
+            addTableHeader(table, "DESCRIPTION");
+            addTableHeader(table, "UNIT COST");
+            addTableHeader(table, "QTY (DAYS)");
+            addTableHeader(table, "AMOUNT");
+
+            // Table Rows
+            table.addCell("Room Category: " + bill.getRoomType());
+            table.addCell("LKR " + bill.getAmountPerDay());
+            table.addCell(String.valueOf(bill.getDays()));
+            table.addCell("LKR " + bill.getTotal());
+
+            document.add(table);
+
+            // 4. Totals Section
             document.add(new com.itextpdf.text.Paragraph(" "));
+            com.itextpdf.text.Paragraph totalPara = new com.itextpdf.text.Paragraph("TOTAL PAID: LKR " + bill.getTotal(),
+                    new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.BOLD));
+            totalPara.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
+            document.add(totalPara);
 
-            // Final Total
-            com.itextpdf.text.Paragraph total = new com.itextpdf.text.Paragraph("TOTAL PAID: LKR " + bill.getTotal());
-            total.setAlignment(com.itextpdf.text.Element.ALIGN_LEFT);
-            document.add(total);
-
-            document.add(new com.itextpdf.text.Paragraph(" "));
-            document.add(new com.itextpdf.text.Paragraph("Thank you for choosing Ocean View Hotel!"));
-
+            document.add(new com.itextpdf.text.Paragraph("\nThank you for choosing Ocean View Hotel!"));
             document.close();
 
         } catch (Exception e) {
             e.printStackTrace();
-            // Fallback if PDF generation fails
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Could not generate PDF");
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error generating PDF");
         }
     }
-}
+
+    // Helper method for the header color
+    private void addTableHeader(com.itextpdf.text.pdf.PdfPTable table, String headerTitle) {
+        com.itextpdf.text.pdf.PdfPCell header = new com.itextpdf.text.pdf.PdfPCell();
+        header.setBackgroundColor(com.itextpdf.text.BaseColor.LIGHT_GRAY);
+        header.setPhrase(new com.itextpdf.text.Phrase(headerTitle, new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.BOLD)));
+        table.addCell(header);
+    }
+
+    // Helper method to remove cell borders
+    private com.itextpdf.text.pdf.PdfPCell getNoBorderCell(String text) {
+        com.itextpdf.text.pdf.PdfPCell cell = new com.itextpdf.text.pdf.PdfPCell(new com.itextpdf.text.Phrase(text));
+        cell.setBorder(com.itextpdf.text.Rectangle.NO_BORDER);
+        return cell;
+    }
+    }

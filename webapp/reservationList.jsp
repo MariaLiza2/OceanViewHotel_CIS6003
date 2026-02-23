@@ -31,44 +31,56 @@
         </form>
     </div>
 
-    <table class="standard-table">
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Res. Number</th>
                 <th>Guest Name</th>
                 <th>Room Type</th>
-                <th>Check In</th><th>Check Out</th>
-                <th>Action</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Status</th> <th>Action</th>
             </tr>
         </thead>
         <tbody>
             <%
                 List<Reservation> list = (List<Reservation>) request.getAttribute("reservations");
-                if (list != null && !list.isEmpty()) {
+                if (list != null) {
                     for (Reservation r : list) {
+                        // Logic to handle the NULLs seen in your DB
+                        String displayNum = (r.getReservationNumber() == null) ? "PENDING" : r.getReservationNumber();
+
+                        // Logic for Status Badge
+                        String status = r.getStatus();
+                        if (status == null) status = "PENDING";
+
+                        String badgeClass = status.equalsIgnoreCase("PAID") ? "badge-success" : "badge-warning";
             %>
                 <tr>
                     <td><%= r.getReservationId() %></td>
-                    <td style="font-weight: bold; color: #2980b9;"><%= r.getReservationNumber() %></td>
+                    <td><%= displayNum %></td>
                     <td><%= r.getGuestName() %></td>
                     <td><%= r.getRoomType() %></td>
                     <td><%= r.getCheckIn() %></td>
-                    <<td><%= r.getCheckOut() %></td>
+                    <td><%= r.getCheckOut() %></td>
 
-                       <td>
-                           <%-- Inside your reservation list loop --%>
-                           <a href="billing?resId=<%= r.getReservationId() %>&resNum=<%= r.getReservationNumber() %>&type=<%= r.getRoomType() %>"
-                              class="btn btn-sm btn-success">Billing</a>
-                       </td>
+                    <td>
+                        <span class="badge <%= badgeClass %>"><%= status %></span>
+                    </td>
+
+                    <td>
+                        <% if (!"PAID".equalsIgnoreCase(status)) { %>
+                            <a href="billing?id=<%= r.getReservationId() %>&type=<%= r.getRoomType() %>&resNum=<%= displayNum %>"
+                               class="btn btn-sm btn-primary">Billing</a>
+                        <% } else { %>
+                            <span class="text-success">Completed</span>
+                        <% } %>
+                    </td>
                 </tr>
             <%
-                    } // End of for loop
-                } else {
-            %>
-                <tr><td colspan="6" style="text-align:center;">No history found for this guest.</td></tr>
-            <%
-                } // End of if/else
+                    }
+                }
             %>
         </tbody>
     </table>

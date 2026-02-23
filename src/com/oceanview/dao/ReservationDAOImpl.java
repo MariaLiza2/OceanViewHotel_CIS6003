@@ -6,18 +6,16 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ReservationDAOImpl implements ReservationDAO {
 
     @Override
     public boolean addReservation(Reservation r) {
-        // 1. Insert query without the reservation_number first
-        String insertSql = "INSERT INTO Reservations (guest_name, address, contact_number, room_type, check_in, check_out) VALUES (?,?,?,?,?,?)";
+        // Updated to include 'PENDING' status by default during insertion
+        String insertSql = "INSERT INTO Reservations (guest_name, address, contact_number, room_type, check_in, check_out, status) VALUES (?,?,?,?,?,?,'PENDING')";
 
         try (Connection con = DBConnection.getConnection()) {
             if (con == null) return false;
 
-            // Use Statement.RETURN_GENERATED_KEYS to get the new ID
             try (PreparedStatement ps = con.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setString(1, r.getGuestName());
                 ps.setString(2, r.getAddress());
@@ -29,15 +27,12 @@ public class ReservationDAOImpl implements ReservationDAO {
                 int affectedRows = ps.executeUpdate();
 
                 if (affectedRows > 0) {
-                    // 2. Retrieve the newly created ID
                     try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                         if (generatedKeys.next()) {
                             int newId = generatedKeys.getInt(1);
-
-                            // 3. Create the OVH string in Java (02d means 2 digits, e.g., 01, 02)
                             String resNumber = "OVH-" + String.format("%02d", newId);
 
-                            // 4. Update the record with the formatted number
+                            // Corrected to use 'reservation_id' to match your schema
                             String updateSql = "UPDATE Reservations SET reservation_number = ? WHERE reservation_id = ?";
                             try (PreparedStatement psUpdate = con.prepareStatement(updateSql)) {
                                 psUpdate.setString(1, resNumber);
@@ -72,6 +67,8 @@ public class ReservationDAOImpl implements ReservationDAO {
                 r.setRoomType(rs.getString("room_type"));
                 r.setCheckIn(rs.getDate("check_in"));
                 r.setCheckOut(rs.getDate("check_out"));
+                // NEW: Pulling status from DB so JSP can show 'PAID' or 'PENDING'
+                r.setStatus(rs.getString("status"));
                 list.add(r);
             }
         } catch (SQLException e) {
@@ -99,6 +96,8 @@ public class ReservationDAOImpl implements ReservationDAO {
                 r.setRoomType(rs.getString("room_type"));
                 r.setCheckIn(rs.getDate("check_in"));
                 r.setCheckOut(rs.getDate("check_out"));
+                // NEW: Ensure search results also show payment status
+                r.setStatus(rs.getString("status"));
                 list.add(r);
             }
         } catch (SQLException e) {
@@ -108,7 +107,18 @@ public class ReservationDAOImpl implements ReservationDAO {
     }
 
     @Override
-    public boolean Reservation(Reservation reservation) {
-        return false;
+    public boolean updatePaymentStatus(int reservationId) {
+        // This SQL must match your SSMS column names exactly
+        String sql = "UPDATE Reservations SET status = 'PAID' WHERE reservation_id = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, reservationId);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
     }
 }

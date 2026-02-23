@@ -7,6 +7,5 @@ public interface ReservationDAO {
     boolean addReservation(Reservation r);
     List<Reservation> getAllReservations();
     List<Reservation> searchReservationsByName(String name);
-
-    boolean Reservation(Reservation reservation);
+    boolean updatePaymentStatus(int reservationId); // Keep this for your PAID logic
 }

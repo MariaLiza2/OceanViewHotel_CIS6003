@@ -129,13 +129,13 @@ public class ReservationDAOImpl implements ReservationDAO {
 
     @Override
     public boolean updatePaymentStatus(int reservationId) {
-        // Correctly updates to 'PAID' after BillingServlet call
+        // Using exactly 'reservation_id' as seen in your DB
         String sql = "UPDATE Reservations SET status = 'PAID' WHERE reservation_id = ?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, reservationId);
             int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
+            return rowsAffected > 0; // Returns true if the row was actually found and changed
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

@@ -19,30 +19,32 @@ public class BillingServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // FIX 1: Check for download action BEFORE checking for IDs
-        // This prevents the redirect to 'viewReservations' when downloading
+        // 1. PRIORITY: Check for download action first
+        // This stops the servlet from redirecting when you just want the PDF
         String action = request.getParameter("action");
         if ("download".equals(action)) {
             generatePDF(request, response);
-            return; // Stops here, successfully delivering the PDF
+            return;
         }
 
-        // --- Standard Billing Page Logic ---
+        // 2. Standard Billing Page Loading
         String resId = request.getParameter("id");
         if (resId == null) resId = request.getParameter("resId");
 
         String type = request.getParameter("type");
         String resNum = request.getParameter("resNum");
 
-        // Redirect only if we aren't downloading AND have no ID
+        // Only redirect to list if we have no ID and aren't downloading
         if (resId == null) {
             response.sendRedirect("viewReservations");
             return;
         }
 
+        // Logic for Room Rates
         double rate = 2500.0;
         if ("Double".equalsIgnoreCase(type)) rate = 4500.0;
         else if ("Luxury".equalsIgnoreCase(type)) rate = 8500.0;
+        else if ("Suite".equalsIgnoreCase(type)) rate = 2500.0; // Matches your receipt
 
         Bill bill = new Bill();
         bill.setReservationId(Integer.parseInt(resId));
@@ -50,6 +52,8 @@ public class BillingServlet extends HttpServlet {
         bill.setAmountPerDay(rate);
 
         request.setAttribute("bill", bill);
+
+        // Save the current resNum to session so the next page has it
         HttpSession session = request.getSession();
         session.setAttribute("resNum", resNum);
 
@@ -60,7 +64,7 @@ public class BillingServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Step 1: Capture parameters
+        // Step 1: Capture parameters from the billing form
         String resIdStr = request.getParameter("reservationId");
         String resNum = request.getParameter("resNum");
         String roomType = request.getParameter("roomType");
@@ -69,35 +73,36 @@ public class BillingServlet extends HttpServlet {
         String paymentMethod = request.getParameter("paymentMethod");
 
         try {
-            // Step 2: Data Parsing
+            // Step 2: Data Parsing (JDK 8 compatible)
             int resId = Integer.parseInt(resIdStr);
             int days = Integer.parseInt(daysStr);
             double amount = Double.parseDouble(amountStr);
             double total = (double) days * amount;
 
-            // Handle potential NULL reservation numbers safely
-            String safeResNum = (resNum == null || resNum.equals("NULL")) ? "OVH-" + resId : resNum;
+            // Fix the reservation number formatting (OVH-XX)
+            String formattedResNum = (resNum == null || resNum.equalsIgnoreCase("PENDING") || resNum.equalsIgnoreCase("null"))
+                    ? "OVH-" + String.format("%02d", resId) : resNum;
             String receiptNo = "OVH-REC-" + String.format("%03d", resId);
 
             // Step 3: Database Logic
             try (Connection conn = com.oceanview.util.DBConnection.getConnection()) {
 
-                // A. Save to Payments (Matches your successful screenshot image_9f2832.png)
+                // A. Save record to Payments Table
                 String sql = "INSERT INTO Payments (reservation_id, reservation_number, room_type, total_amount, payment_method, payment_date) VALUES (?, ?, ?, ?, ?, GETDATE())";
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setInt(1, resId);
-                    ps.setString(2, safeResNum);
+                    ps.setString(2, formattedResNum);
                     ps.setString(3, roomType);
                     ps.setDouble(4, total);
                     ps.setString(5, paymentMethod);
                     ps.executeUpdate();
                 }
 
-                // B. Update Status (Matches your screenshot image_9f27d8.png)
+                // B. Update Reservation Status to 'PAID'
                 reservationDAO.updatePaymentStatus(resId);
             }
 
-            // Step 4: Session for PDF
+            // Step 4: Save to Session for PDF Generation
             Bill bill = new Bill();
             bill.setRoomType(roomType);
             bill.setDays(days);
@@ -106,17 +111,19 @@ public class BillingServlet extends HttpServlet {
 
             HttpSession session = request.getSession();
             session.setAttribute("bill", bill);
-            session.setAttribute("resNum", safeResNum);
+            session.setAttribute("resNum", formattedResNum); // This fixes the blank PDF Res No
             session.setAttribute("receiptNo", receiptNo);
 
-            // Step 5: SUCCESS!
+            // Step 5: SUCCESS - Forward to success page
             request.getRequestDispatcher("payment-success.jsp").forward(request, response);
 
         } catch (Exception e) {
-            e.printStackTrace(); // This will print the EXACT error in your console
+            e.printStackTrace();
+            // Redirects only if a true database/parsing error occurs
             response.sendRedirect("viewReservations?error=paymentFailed");
         }
     }
+
     private void generatePDF(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
         Bill bill = (Bill) session.getAttribute("bill");
@@ -144,11 +151,12 @@ public class BillingServlet extends HttpServlet {
             document.add(new com.itextpdf.text.Paragraph("Ocean View Hotel", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD)));
             document.add(new com.itextpdf.text.Paragraph(" "));
 
-            // Info
+            // Info Table
             com.itextpdf.text.pdf.PdfPTable infoTable = new com.itextpdf.text.pdf.PdfPTable(2);
             infoTable.setWidthPercentage(100);
             infoTable.addCell(getNoBorderCell("RECEIPT #: " + receiptNo));
             infoTable.addCell(getNoBorderCell("DATE: " + new java.util.Date().toString()));
+            // This line now uses the resNum from the session
             infoTable.addCell(getNoBorderCell("RESERVATION NO: " + (resNum != null ? resNum : "N/A")));
             document.add(infoTable);
             document.add(new com.itextpdf.text.Paragraph(" "));

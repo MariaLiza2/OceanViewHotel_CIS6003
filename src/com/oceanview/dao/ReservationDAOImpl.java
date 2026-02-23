@@ -10,7 +10,6 @@ public class ReservationDAOImpl implements ReservationDAO {
 
     @Override
     public boolean addReservation(Reservation r) {
-        // Updated to include 'PENDING' status by default during insertion
         String insertSql = "INSERT INTO Reservations (guest_name, address, contact_number, room_type, check_in, check_out, status) VALUES (?,?,?,?,?,?,'PENDING')";
 
         try (Connection con = DBConnection.getConnection()) {
@@ -32,7 +31,6 @@ public class ReservationDAOImpl implements ReservationDAO {
                             int newId = generatedKeys.getInt(1);
                             String resNumber = "OVH-" + String.format("%02d", newId);
 
-                            // Corrected to use 'reservation_id' to match your schema
                             String updateSql = "UPDATE Reservations SET reservation_number = ? WHERE reservation_id = ?";
                             try (PreparedStatement psUpdate = con.prepareStatement(updateSql)) {
                                 psUpdate.setString(1, resNumber);
@@ -61,14 +59,26 @@ public class ReservationDAOImpl implements ReservationDAO {
 
             while (rs.next()) {
                 Reservation r = new Reservation();
-                r.setReservationId(rs.getInt("reservation_id"));
-                r.setReservationNumber(rs.getString("reservation_number"));
+                int id = rs.getInt("reservation_id");
+                r.setReservationId(id);
+
+                // Handle 'PENDING' or 'null' in reservation_number column
+                String dbResNum = rs.getString("reservation_number");
+                if (dbResNum == null || dbResNum.equalsIgnoreCase("PENDING") || dbResNum.equalsIgnoreCase("null")) {
+                    r.setReservationNumber("OVH-" + String.format("%02d", id));
+                } else {
+                    r.setReservationNumber(dbResNum);
+                }
+
                 r.setGuestName(rs.getString("guest_name"));
                 r.setRoomType(rs.getString("room_type"));
                 r.setCheckIn(rs.getDate("check_in"));
                 r.setCheckOut(rs.getDate("check_out"));
-                // NEW: Pulling status from DB so JSP can show 'PAID' or 'PENDING'
-                r.setStatus(rs.getString("status"));
+
+                // CRITICAL FIX: Ensure status is never null when sent to JSP
+                String status = rs.getString("status");
+                r.setStatus(status != null ? status : "PENDING");
+
                 list.add(r);
             }
         } catch (SQLException e) {
@@ -90,14 +100,25 @@ public class ReservationDAOImpl implements ReservationDAO {
 
             while (rs.next()) {
                 Reservation r = new Reservation();
-                r.setReservationId(rs.getInt("reservation_id"));
-                r.setReservationNumber(rs.getString("reservation_number"));
+                int id = rs.getInt("reservation_id");
+                r.setReservationId(id);
+
+                String dbResNum = rs.getString("reservation_number");
+                if (dbResNum == null || dbResNum.equalsIgnoreCase("PENDING") || dbResNum.equalsIgnoreCase("null")) {
+                    r.setReservationNumber("OVH-" + String.format("%02d", id));
+                } else {
+                    r.setReservationNumber(dbResNum);
+                }
+
                 r.setGuestName(rs.getString("guest_name"));
                 r.setRoomType(rs.getString("room_type"));
                 r.setCheckIn(rs.getDate("check_in"));
                 r.setCheckOut(rs.getDate("check_out"));
-                // NEW: Ensure search results also show payment status
-                r.setStatus(rs.getString("status"));
+
+                // Ensure status is handled in search as well
+                String status = rs.getString("status");
+                r.setStatus(status != null ? status : "PENDING");
+
                 list.add(r);
             }
         } catch (SQLException e) {
@@ -108,7 +129,7 @@ public class ReservationDAOImpl implements ReservationDAO {
 
     @Override
     public boolean updatePaymentStatus(int reservationId) {
-        // This SQL must match your SSMS column names exactly
+        // Correctly updates to 'PAID' after BillingServlet call
         String sql = "UPDATE Reservations SET status = 'PAID' WHERE reservation_id = ?";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
@@ -119,6 +140,5 @@ public class ReservationDAOImpl implements ReservationDAO {
             e.printStackTrace();
             return false;
         }
-
     }
 }

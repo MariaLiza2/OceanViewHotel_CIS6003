@@ -61,16 +61,20 @@
 
 
                             <div class="row">
-                                <div class="col-6 mb-3">
-                                    <label class="form-label fw-bold">Stay Duration (Days)</label>
-                                    <input type="number" id="daysInput" name="days" value="1" min="1"
-                                           class="form-control" oninput="calculateTotal()">
-                                </div>
-                                <div class="col-6 mb-3">
-                                    <label class="form-label fw-bold">Rate Per Day (LKR)</label>
-                                    <input type="number" id="rateInput" name="amount"
-                                           value="<%= bill.getAmountPerDay() %>" class="form-control" readonly>
-                                </div>
+                               <div class="mb-3">
+                                   <label>Stay Duration (Days)</label>
+                                   <input type="text" name="days" value="${bill.days}" class="form-control" readonly>
+                               </div>
+
+                               <div class="mb-3">
+                                   <label>Daily Rate (LKR)</label>
+                                   <input type="text" name="amount" value="${bill.amountPerDay}" class="form-control" readonly>
+                               </div>
+
+                               <div class="mb-3">
+                                   <label>Total to Pay (LKR)</label>
+                                   <input type="text" value="${bill.total}" class="form-control" readonly style="font-weight: bold; color: blue;">
+                               </div>
                             </div>
 
                             <div class="mb-4">
@@ -83,8 +87,12 @@
                             </div>
 
                             <div class="p-3 bg-light rounded text-center mb-3">
-                                <span class="text-muted d-block small">Grand Total</span>
-                                <h2 class="text-success mb-0" id="totalDisplay">LKR 0.00</h2>
+
+                                <div class="grand-total-container">
+                                    <span class="label">Grand Total</span>
+                                    <h2 class="total-amount">LKR ${bill.total}</h2>
+                                </div>
+
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Confirm & Generate Receipt</button>

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class RoomDAO {
 
-    // 1. Get all rooms from database
+        // 1. Get all rooms from database
     public static List<Room> getAllRooms() {
         List<Room> list = new ArrayList<>();
         try {
@@ -97,5 +97,20 @@ public class RoomDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+
+    public double getRoomPriceByType(String roomType) {
+        String sql = "SELECT rate_per_day FROM rooms WHERE room_type = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, roomType);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("rate_per_day");
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0.0; // Return a valid number to avoid the curly bracket error
     }
 }

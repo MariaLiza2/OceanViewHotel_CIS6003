@@ -19,7 +19,10 @@
 
 <div class="main-container container mt-4">
     <h2>Guest Reservation History</h2>
-
+    <br>
+ <div class="mt-4">
+        <a href="dashboard.jsp" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
     <div style="margin-bottom: 20px; background: #ecf0f1; padding: 15px; border-radius: 8px;">
         <form action="${pageContext.request.contextPath}/viewReservations" method="get" style="display: flex; gap: 10px;">
             <input type="text" name="searchName" placeholder="Enter Guest Name (e.g. Kate)..."
@@ -95,9 +98,7 @@
         </tbody>
     </table>
 
-    <div class="mt-4">
-        <a href="dashboard.jsp" class="btn btn-outline-secondary">Back to Dashboard</a>
-    </div>
+
 </div>
 </body>
 </html>

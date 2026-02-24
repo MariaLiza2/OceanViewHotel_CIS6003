@@ -8,4 +8,5 @@ public interface ReservationDAO {
     List<Reservation> getAllReservations();
     List<Reservation> searchReservationsByName(String name);
     boolean updatePaymentStatus(int reservationId); // Keep this for your PAID logic
+    Reservation getReservationById(int id);
 }

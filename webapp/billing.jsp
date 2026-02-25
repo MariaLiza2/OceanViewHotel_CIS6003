@@ -1,12 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.oceanview.model.Bill" %>
 <%
-    // Retrieve the bill object set by BillingServlet's doGet
     Bill bill = (Bill) request.getAttribute("bill");
-
-    // Safety check: if someone tries to access this page directly without a reservation
     if (bill == null) {
-        response.sendRedirect("addReservation"); // Redirect to your reservation list
+        response.sendRedirect("viewReservations");
         return;
     }
 %>
@@ -17,21 +14,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <script>
         function calculateTotal() {
-            // Get values from the input fields
-            let days = document.getElementById('daysInput').value;
-            let rate = document.getElementById('rateInput').value;
+            // FIX: Matching IDs with the input elements below to stop the console error
+            const daysElem = document.getElementById('daysInput');
+            const rateElem = document.getElementById('rateInput');
+            const totalDisplay = document.getElementById('totalDisplay');
+            const hiddenTotal = document.getElementById('totalAmountHidden');
 
-            // Calculate total
-            let total = (days && rate) ? (parseFloat(days) * parseFloat(rate)) : 0;
+            if (daysElem && rateElem && totalDisplay && hiddenTotal) {
+                let days = parseFloat(daysElem.value) || 0;
+                let rate = parseFloat(rateElem.value) || 0;
+                let total = days * rate;
 
-            // Update the visual display for the user
-            document.getElementById('totalDisplay').innerText = "LKR " + total.toLocaleString();
+                // Updates the visual LKR 0.00 to the correct amount
+                totalDisplay.innerText = "LKR " + total.toLocaleString();
 
-            // CRITICAL: Update the hidden input field that the Servlet will actually read
-            document.getElementById('totalAmountHidden').value = total;
+                // Updates the hidden field so BillingServlet gets the data
+                hiddenTotal.value = total.toFixed(2);
+            }
         }
-
-        // Run calculation once when the page loads to show initial total
         window.onload = calculateTotal;
     </script>
 </head>
@@ -39,19 +39,16 @@
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
-            <%-- Inside billing.jsp inside the <form> --%>
-
                 <form action="billing" method="post">
-
+                    <input type="hidden" name="reservationId" value="<%= bill.getReservationId() %>">
+                    <input type="hidden" name="resNum" value="${resNum}">
                     <input type="hidden" name="roomType" value="<%= bill.getRoomType() %>">
-                    <input type="hidden" name="totalAmount" id="totalAmountHidden" value="">
-                    <input type="hidden" name="reservationId" value="${bill.reservationId}">
-                        <input type="hidden" name="resNum" value="${resNum}">
+                    <input type="hidden" name="totalAmount" id="totalAmountHidden" value="${bill.total}">
 
                     <div class="card shadow border-0">
                        <div class="card-header bg-dark text-white p-3 text-center">
                            <h4 class="mb-0">Invoice Generation</h4>
-                           <small>Reservation Number: ${resNum != null ? resNum : bill.reservationId}</small>
+                           <small>Reservation: ${resNum != null ? resNum : "N/A"}</small>
                        </div>
                         <div class="card-body p-4">
                             <div class="mb-3">
@@ -59,21 +56,15 @@
                                 <input type="text" class="form-control bg-light" value="<%= bill.getRoomType() %>" readonly>
                             </div>
 
-
                             <div class="row">
-                               <div class="mb-3">
+                               <div class="mb-3 col-6">
                                    <label>Stay Duration (Days)</label>
-                                   <input type="text" name="days" value="${bill.days}" class="form-control" readonly>
+                                   <input type="text" id="daysInput" name="days" value="${bill.days}" class="form-control" readonly>
                                </div>
 
-                               <div class="mb-3">
+                               <div class="mb-3 col-6">
                                    <label>Daily Rate (LKR)</label>
-                                   <input type="text" name="amount" value="${bill.amountPerDay}" class="form-control" readonly>
-                               </div>
-
-                               <div class="mb-3">
-                                   <label>Total to Pay (LKR)</label>
-                                   <input type="text" value="${bill.total}" class="form-control" readonly style="font-weight: bold; color: blue;">
+                                   <input type="text" id="rateInput" name="amount" value="${bill.amountPerDay}" class="form-control" readonly>
                                </div>
                             </div>
 
@@ -87,16 +78,12 @@
                             </div>
 
                             <div class="p-3 bg-light rounded text-center mb-3">
-
-                                <div class="grand-total-container">
-                                    <span class="label">Grand Total</span>
-                                    <h2 class="total-amount">LKR ${bill.total}</h2>
-                                </div>
-
+                                <span class="text-muted small d-block">Grand Total</span>
+                                <h2 id="totalDisplay" class="text-success fw-bold">LKR ${bill.total}</h2>
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Confirm & Generate Receipt</button>
-                            <a href="addReservation" class="btn btn-link w-100 text-muted mt-2">Cancel</a>
+                            <a href="viewReservations" class="btn btn-link w-100 text-muted mt-2">Cancel</a>
                         </div>
                     </div>
                 </form>

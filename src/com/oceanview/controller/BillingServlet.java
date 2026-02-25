@@ -13,6 +13,7 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 @WebServlet("/billing")
 public class BillingServlet extends HttpServlet {
@@ -47,12 +48,11 @@ public class BillingServlet extends HttpServlet {
                 return;
             }
 
-            // 1. DYNAMIC DAYS CALCULATION (Calendar-based)
+            // Calculation Logic
             long diffInMillies = Math.abs(res.getCheckOut().getTime() - res.getCheckIn().getTime());
             long diffInDays = diffInMillies / (1000 * 60 * 60 * 24);
             if (diffInDays <= 0) diffInDays = 1;
 
-            // 2. DYNAMIC ROOM RATE (From Manage Rooms Database)
             double rate = roomDAO.getRoomPriceByType(res.getRoomType());
 
             Bill bill = new Bill();
@@ -62,10 +62,14 @@ public class BillingServlet extends HttpServlet {
             bill.setDays((int) diffInDays);
             bill.setTotal(diffInDays * rate);
 
+            // Store in Request for JSP
             request.setAttribute("bill", bill);
 
+            // Store in Session for PDF and Post-Payment
             HttpSession session = request.getSession();
+            session.setAttribute("bill", bill);
             session.setAttribute("resNum", res.getReservationNumber());
+            session.setAttribute("guestName", res.getGuestName());
 
             request.getRequestDispatcher("billing.jsp").forward(request, response);
 
@@ -79,55 +83,74 @@ public class BillingServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // 1. Capture parameters from billing.jsp form
         String resIdStr = request.getParameter("reservationId");
         String resNum = request.getParameter("resNum");
         String roomType = request.getParameter("roomType");
         String daysStr = request.getParameter("days");
-        String amountStr = request.getParameter("amount");
+        String totalStr = request.getParameter("totalAmount");
         String paymentMethod = request.getParameter("paymentMethod");
 
         try {
+            if (resIdStr == null || totalStr == null || totalStr.isEmpty()) {
+                throw new Exception("Missing Reservation ID or Total Amount");
+            }
+
             int resId = Integer.parseInt(resIdStr);
-            int days = Integer.parseInt(daysStr);
-            double amount = Double.parseDouble(amountStr);
-            double total = (double) days * amount;
+            double total = Double.parseDouble(totalStr);
+            int days = (daysStr != null && !daysStr.isEmpty()) ? Integer.parseInt(daysStr) : 1;
+
+            // Fix: resNum fallback logic
+            if (resNum == null || resNum.trim().isEmpty() || resNum.equals("null")) {
+                resNum = "OVH-RES-" + resId;
+            }
 
             String receiptNo = "OVH-REC-" + String.format("%03d", resId);
 
-            // Database Operations
             try (Connection conn = com.oceanview.util.DBConnection.getConnection()) {
-                conn.setAutoCommit(false); // Transaction safety
+                conn.setAutoCommit(false);
 
-                try {
-                    // A. Insert Payment
-                    String sql = "INSERT INTO Payments (reservation_id, reservation_number, room_type, total_amount, payment_method, payment_date) VALUES (?, ?, ?, ?, ?, GETDATE())";
-                    try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                        ps.setInt(1, resId);
-                        ps.setString(2, resNum);
-                        ps.setString(3, roomType);
-                        ps.setDouble(4, total);
-                        ps.setString(5, paymentMethod);
-                        ps.executeUpdate();
+                // 2. Check for duplicate reservation_number (Unique Key Safety)
+                String checkSql = "SELECT COUNT(*) FROM Payments WHERE reservation_number = ?";
+                try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+                    checkPs.setString(1, resNum);
+                    try (ResultSet rs = checkPs.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) > 0) {
+                            conn.rollback();
+                            System.out.println("Payment blocked: Duplicate resNum " + resNum);
+                            response.sendRedirect("viewReservations?error=alreadyPaid");
+                            return;
+                        }
                     }
+                }
 
-                    // B. Update Reservation Status
+                // 3. Insert Payment into SSMS
+                String sql = "INSERT INTO Payments (reservation_id, reservation_number, room_type, total_amount, payment_method, payment_date) VALUES (?, ?, ?, ?, ?, GETDATE())";
+                try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                    ps.setInt(1, resId);
+                    ps.setString(2, resNum);
+                    ps.setString(3, roomType);
+                    ps.setDouble(4, total);
+                    ps.setString(5, paymentMethod);
+                    ps.executeUpdate();
+
                     reservationDAO.updatePaymentStatus(resId);
-
                     conn.commit();
                 } catch (Exception e) {
                     conn.rollback();
-                    throw e;
+                    throw e; // Pass to outer catch for logging
                 }
             }
 
-            // Save to session for PDF
+            // 4. Update session data for the Success page and PDF generator
+            HttpSession session = request.getSession();
             Bill bill = new Bill();
+            bill.setReservationId(resId);
             bill.setRoomType(roomType);
             bill.setDays(days);
-            bill.setAmountPerDay(amount);
             bill.setTotal(total);
+            bill.setAmountPerDay(total / (days > 0 ? days : 1));
 
-            HttpSession session = request.getSession();
             session.setAttribute("bill", bill);
             session.setAttribute("resNum", resNum);
             session.setAttribute("receiptNo", receiptNo);
@@ -135,7 +158,10 @@ public class BillingServlet extends HttpServlet {
             request.getRequestDispatcher("payment-success.jsp").forward(request, response);
 
         } catch (Exception e) {
+            // CRITICAL: Check your console log if you see "paymentFailed"
+            System.err.println("=== PAYMENT ERROR LOG START ===");
             e.printStackTrace();
+            System.err.println("=== PAYMENT ERROR LOG END ===");
             response.sendRedirect("viewReservations?error=paymentFailed");
         }
     }
@@ -145,6 +171,7 @@ public class BillingServlet extends HttpServlet {
         Bill bill = (Bill) session.getAttribute("bill");
         String resNum = (String) session.getAttribute("resNum");
         String receiptNo = (String) session.getAttribute("receiptNo");
+        String guestName = (String) session.getAttribute("guestName");
 
         if (bill == null) {
             response.sendRedirect("viewReservations");
@@ -152,38 +179,41 @@ public class BillingServlet extends HttpServlet {
         }
 
         response.setContentType("application/pdf");
-        response.setHeader("Content-Disposition", "attachment; filename=Receipt_" + (resNum != null ? resNum : "Receipt") + ".pdf");
+        response.setHeader("Content-Disposition", "attachment; filename=Receipt_" + receiptNo + ".pdf");
 
         try {
             com.itextpdf.text.Document document = new com.itextpdf.text.Document();
             com.itextpdf.text.pdf.PdfWriter.getInstance(document, response.getOutputStream());
             document.open();
 
-            // --- HOTEL HEADER ---
+            // Receipt Header
             com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 22, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.BLUE);
-            com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("RECEIPT", titleFont);
+            com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("PAYMENT RECEIPT", titleFont);
             title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
             document.add(title);
-
-            document.add(new com.itextpdf.text.Paragraph("Ocean View Hotel", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD)));
-
-            // ADDED ADDRESS
-            document.add(new com.itextpdf.text.Paragraph("123 Beach Road, Galle, Sri Lanka", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10)));
-            document.add(new com.itextpdf.text.Paragraph("Contact: +94 112 345 678", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10)));
             document.add(new com.itextpdf.text.Paragraph(" "));
 
-            // --- INFO TABLE (Receipt No, Date, Reservation No) ---
+            document.add(new com.itextpdf.text.Paragraph("Ocean View Hotel", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD)));
+            document.add(new com.itextpdf.text.Paragraph("123 Beach Road, Galle, Sri Lanka", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10)));
+            document.add(new com.itextpdf.text.Paragraph(" "));
+
+            // Metadata Table
             com.itextpdf.text.pdf.PdfPTable infoTable = new com.itextpdf.text.pdf.PdfPTable(2);
             infoTable.setWidthPercentage(100);
+
             infoTable.addCell(getNoBorderCell("RECEIPT #: " + receiptNo));
             infoTable.addCell(getNoBorderCell("DATE: " + new java.util.Date().toString()));
 
-            // ENSURING RESERVATION NO. IS SHOWN
+            infoTable.addCell(getNoBorderCell("GUEST NAME: " + (guestName != null ? guestName : "N/A")));
+            infoTable.addCell(getNoBorderCell("RESERVATION ID: " + bill.getReservationId()));
+
             infoTable.addCell(getNoBorderCell("RESERVATION NO: " + (resNum != null ? resNum : "N/A")));
+            infoTable.addCell(getNoBorderCell("STATUS: PAID"));
+
             document.add(infoTable);
             document.add(new com.itextpdf.text.Paragraph(" "));
 
-            // --- DETAILS TABLE ---
+            // Invoice Table
             com.itextpdf.text.pdf.PdfPTable table = new com.itextpdf.text.pdf.PdfPTable(4);
             table.setWidthPercentage(100);
             addTableHeader(table, "DESCRIPTION");
@@ -191,29 +221,21 @@ public class BillingServlet extends HttpServlet {
             addTableHeader(table, "QTY (DAYS)");
             addTableHeader(table, "AMOUNT");
 
-            table.addCell(bill.getRoomType());
+            table.addCell(bill.getRoomType() + " Accommodation");
             table.addCell("LKR " + String.format("%.2f", bill.getAmountPerDay()));
             table.addCell(String.valueOf(bill.getDays()));
-            table.addCell("LKR " + String.format("%.2f", bill.getTotal())); //
+            table.addCell("LKR " + String.format("%.2f", bill.getTotal()));
 
             document.add(table);
             document.add(new com.itextpdf.text.Paragraph(" "));
 
-            // --- GRAND TOTAL ---
             com.itextpdf.text.Paragraph totalPara = new com.itextpdf.text.Paragraph("GRAND TOTAL: LKR " + String.format("%.2f", bill.getTotal()),
-                    new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD));
+                    new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 16, com.itextpdf.text.Font.BOLD));
             totalPara.setAlignment(com.itextpdf.text.Element.ALIGN_RIGHT);
             document.add(totalPara);
 
-            document.add(new com.itextpdf.text.Paragraph(" "));
-            com.itextpdf.text.Paragraph footer = new com.itextpdf.text.Paragraph("Thank you for staying with us!", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.ITALIC));
-            footer.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
-            document.add(footer);
-
             document.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
     private void addTableHeader(com.itextpdf.text.pdf.PdfPTable table, String headerTitle) {

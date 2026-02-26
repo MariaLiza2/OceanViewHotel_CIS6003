@@ -15,45 +15,53 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-    @WebServlet("/viewPayments")
-    public class PaymentListServlet extends HttpServlet {
-        protected void doGet(HttpServletRequest request, HttpServletResponse response)
-                throws ServletException, IOException {
+@WebServlet("/viewPayments")
+public class PaymentListServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-            List<Payment> paymentList = new ArrayList<>();
-            // Get the search input from the JSP
-            String searchQuery = request.getParameter("searchQuery");
+        List<Payment> paymentList = new ArrayList<>();
+        String searchQuery = request.getParameter("searchQuery");
 
-            try (Connection conn = com.oceanview.util.DBConnection.getConnection()) {
-                String sql;
-                PreparedStatement ps;
+        try (Connection conn = com.oceanview.util.DBConnection.getConnection()) {
+            StringBuilder sql = new StringBuilder();
 
-                if (searchQuery != null && !searchQuery.trim().isEmpty()) {
-                    // Search mode: Filter by reservation_number
-                    sql = "SELECT * FROM Payments WHERE reservation_number LIKE ? ORDER BY payment_date DESC";
-                    ps = conn.prepareStatement(sql);
-                    ps.setString(1, "%" + searchQuery.trim() + "%");
-                } else {
-                    // Normal mode: Show all payments
-                    sql = "SELECT * FROM Payments ORDER BY payment_date DESC";
-                    ps = conn.prepareStatement(sql);
-                }
+            // We use a JOIN to get the guest_name from the Reservations table
+            sql.append("SELECT p.*, r.guest_name ");
+            sql.append("FROM Payments p ");
+            sql.append("JOIN Reservations r ON p.reservation_id = r.reservation_id ");
 
-                ResultSet rs = ps.executeQuery();
-                while (rs.next()) {
-                    Payment p = new Payment();
-                    p.setReservationId(rs.getInt("reservation_id"));
-                    p.setReservationNumber(rs.getString("reservation_number"));
-                    p.setRoomType(rs.getString("room_type"));
-                    p.setTotalAmount(rs.getDouble("total_amount"));
-                    p.setPaymentMethod(rs.getString("payment_method"));
-                    p.setPaymentDate(rs.getTimestamp("payment_date"));
-                    paymentList.add(p);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                sql.append("WHERE p.reservation_number LIKE ? ");
+            }
+            sql.append("ORDER BY p.payment_date DESC");
+
+            PreparedStatement ps = conn.prepareStatement(sql.toString());
+
+            if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                ps.setString(1, "%" + searchQuery.trim() + "%");
             }
 
-            request.setAttribute("payments", paymentList);
-            request.getRequestDispatcher("payment-list.jsp").forward(request, response);
-        }}
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Payment p = new Payment();
+                p.setReservationId(rs.getInt("reservation_id"));
+                p.setReservationNumber(rs.getString("reservation_number"));
+                p.setRoomType(rs.getString("room_type"));
+                p.setTotalAmount(rs.getDouble("total_amount"));
+                p.setPaymentMethod(rs.getString("payment_method"));
+                p.setPaymentDate(rs.getTimestamp("payment_date"));
+
+                // POPULATE THE NAME HERE:
+                p.setGuestName(rs.getString("guest_name"));
+
+                paymentList.add(p);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        request.setAttribute("payments", paymentList);
+        request.getRequestDispatcher("payment-list.jsp").forward(request, response);
+    }
+}

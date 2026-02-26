@@ -62,10 +62,8 @@ public class BillingServlet extends HttpServlet {
             bill.setDays((int) diffInDays);
             bill.setTotal(diffInDays * rate);
 
-            // Store in Request for JSP
             request.setAttribute("bill", bill);
 
-            // Store in Session for PDF and Post-Payment
             HttpSession session = request.getSession();
             session.setAttribute("bill", bill);
             session.setAttribute("resNum", res.getReservationNumber());
@@ -83,7 +81,6 @@ public class BillingServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Capture parameters from billing.jsp form
         String resIdStr = request.getParameter("reservationId");
         String resNum = request.getParameter("resNum");
         String roomType = request.getParameter("roomType");
@@ -97,12 +94,22 @@ public class BillingServlet extends HttpServlet {
             }
 
             int resId = Integer.parseInt(resIdStr);
-            double total = Double.parseDouble(totalStr);
+
+            // Clean currency symbols or spaces if they exist in the input
+            String cleanTotal = totalStr.replace("LKR", "").replace(",", "").trim();
+            double total = Double.parseDouble(cleanTotal);
             int days = (daysStr != null && !daysStr.isEmpty()) ? Integer.parseInt(daysStr) : 1;
 
-            // Fix: resNum fallback logic
-            if (resNum == null || resNum.trim().isEmpty() || resNum.equals("null")) {
-                resNum = "OVH-RES-" + resId;
+            // 1. DATA VALIDATION: Fetch fresh data to ensure resNum and guestName are NOT NULL
+            Reservation res = reservationDAO.getReservationById(resId);
+            if (res == null) throw new Exception("Reservation record not found.");
+
+            String guestName = (res.getGuestName() != null) ? res.getGuestName() : "Guest";
+
+            // Fix for the Unique Constraint <NULL> error:
+            // If resNum is null from form, take it from database. If still null, generate a fallback.
+            if (resNum == null || resNum.trim().isEmpty() || resNum.equalsIgnoreCase("null")) {
+                resNum = (res.getReservationNumber() != null) ? res.getReservationNumber() : "OVH-RES-" + resId;
             }
 
             String receiptNo = "OVH-REC-" + String.format("%03d", resId);
@@ -110,25 +117,24 @@ public class BillingServlet extends HttpServlet {
             try (Connection conn = com.oceanview.util.DBConnection.getConnection()) {
                 conn.setAutoCommit(false);
 
-                // 2. Check for duplicate reservation_number (Unique Key Safety)
-                String checkSql = "SELECT COUNT(*) FROM Payments WHERE reservation_number = ?";
+                // Duplicate Check to prevent crashes
+                String checkSql = "SELECT COUNT(*) FROM Payments WHERE reservation_id = ?";
                 try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
-                    checkPs.setString(1, resNum);
+                    checkPs.setInt(1, resId);
                     try (ResultSet rs = checkPs.executeQuery()) {
                         if (rs.next() && rs.getInt(1) > 0) {
                             conn.rollback();
-                            System.out.println("Payment blocked: Duplicate resNum " + resNum);
                             response.sendRedirect("viewReservations?error=alreadyPaid");
                             return;
                         }
                     }
                 }
 
-                // 3. Insert Payment into SSMS
+                // Database Insert
                 String sql = "INSERT INTO Payments (reservation_id, reservation_number, room_type, total_amount, payment_method, payment_date) VALUES (?, ?, ?, ?, ?, GETDATE())";
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setInt(1, resId);
-                    ps.setString(2, resNum);
+                    ps.setString(2, resNum); // This is now guaranteed to not be NULL
                     ps.setString(3, roomType);
                     ps.setDouble(4, total);
                     ps.setString(5, paymentMethod);
@@ -138,11 +144,11 @@ public class BillingServlet extends HttpServlet {
                     conn.commit();
                 } catch (Exception e) {
                     conn.rollback();
-                    throw e; // Pass to outer catch for logging
+                    throw e;
                 }
             }
 
-            // 4. Update session data for the Success page and PDF generator
+            // 2. Refresh the Session for PDF generation
             HttpSession session = request.getSession();
             Bill bill = new Bill();
             bill.setReservationId(resId);
@@ -154,14 +160,13 @@ public class BillingServlet extends HttpServlet {
             session.setAttribute("bill", bill);
             session.setAttribute("resNum", resNum);
             session.setAttribute("receiptNo", receiptNo);
+            session.setAttribute("guestName", guestName);
 
             request.getRequestDispatcher("payment-success.jsp").forward(request, response);
 
         } catch (Exception e) {
-            // CRITICAL: Check your console log if you see "paymentFailed"
-            System.err.println("=== PAYMENT ERROR LOG START ===");
+            System.err.println("PAYMENT ERROR: " + e.getMessage());
             e.printStackTrace();
-            System.err.println("=== PAYMENT ERROR LOG END ===");
             response.sendRedirect("viewReservations?error=paymentFailed");
         }
     }
@@ -169,14 +174,27 @@ public class BillingServlet extends HttpServlet {
     private void generatePDF(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
         Bill bill = (Bill) session.getAttribute("bill");
-        String resNum = (String) session.getAttribute("resNum");
-        String receiptNo = (String) session.getAttribute("receiptNo");
-        String guestName = (String) session.getAttribute("guestName");
 
         if (bill == null) {
             response.sendRedirect("viewReservations");
             return;
         }
+
+        // Fresh fetch for PDF to avoid "N/A"
+        String guestName = "Valued Guest";
+        String resNum = "N/A";
+        try {
+            Reservation res = reservationDAO.getReservationById(bill.getReservationId());
+            if (res != null) {
+                guestName = (res.getGuestName() != null) ? res.getGuestName() : "Valued Guest";
+                resNum = (res.getReservationNumber() != null) ? res.getReservationNumber() : "N/A";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String receiptNo = (String) session.getAttribute("receiptNo");
+        if (receiptNo == null) receiptNo = "OVH-REC-" + String.format("%03d", bill.getReservationId());
 
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=Receipt_" + receiptNo + ".pdf");
@@ -186,7 +204,7 @@ public class BillingServlet extends HttpServlet {
             com.itextpdf.text.pdf.PdfWriter.getInstance(document, response.getOutputStream());
             document.open();
 
-            // Receipt Header
+            // Header
             com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 22, com.itextpdf.text.Font.BOLD, com.itextpdf.text.BaseColor.BLUE);
             com.itextpdf.text.Paragraph title = new com.itextpdf.text.Paragraph("PAYMENT RECEIPT", titleFont);
             title.setAlignment(com.itextpdf.text.Element.ALIGN_CENTER);
@@ -197,23 +215,19 @@ public class BillingServlet extends HttpServlet {
             document.add(new com.itextpdf.text.Paragraph("123 Beach Road, Galle, Sri Lanka", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10)));
             document.add(new com.itextpdf.text.Paragraph(" "));
 
-            // Metadata Table
+            // Info Table
             com.itextpdf.text.pdf.PdfPTable infoTable = new com.itextpdf.text.pdf.PdfPTable(2);
             infoTable.setWidthPercentage(100);
-
             infoTable.addCell(getNoBorderCell("RECEIPT #: " + receiptNo));
             infoTable.addCell(getNoBorderCell("DATE: " + new java.util.Date().toString()));
-
-            infoTable.addCell(getNoBorderCell("GUEST NAME: " + (guestName != null ? guestName : "N/A")));
+            infoTable.addCell(getNoBorderCell("GUEST NAME: " + guestName));
             infoTable.addCell(getNoBorderCell("RESERVATION ID: " + bill.getReservationId()));
-
-            infoTable.addCell(getNoBorderCell("RESERVATION NO: " + (resNum != null ? resNum : "N/A")));
+            infoTable.addCell(getNoBorderCell("RESERVATION NO: " + resNum));
             infoTable.addCell(getNoBorderCell("STATUS: PAID"));
-
             document.add(infoTable);
             document.add(new com.itextpdf.text.Paragraph(" "));
 
-            // Invoice Table
+            // Invoice Items
             com.itextpdf.text.pdf.PdfPTable table = new com.itextpdf.text.pdf.PdfPTable(4);
             table.setWidthPercentage(100);
             addTableHeader(table, "DESCRIPTION");
@@ -225,7 +239,6 @@ public class BillingServlet extends HttpServlet {
             table.addCell("LKR " + String.format("%.2f", bill.getAmountPerDay()));
             table.addCell(String.valueOf(bill.getDays()));
             table.addCell("LKR " + String.format("%.2f", bill.getTotal()));
-
             document.add(table);
             document.add(new com.itextpdf.text.Paragraph(" "));
 

@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 public class Payment {
     private int reservationId;
     private String reservationNumber;
+    private String guestName;
     private String roomType;
     private double totalAmount;
     private String paymentMethod;
@@ -12,6 +13,7 @@ public class Payment {
     // --- SETTERS (These fix the Servlet while-loop errors) ---
     public void setReservationId(int id) { this.reservationId = id; }
     public void setReservationNumber(String num) { this.reservationNumber = num; }
+    public void setGuestName(String guestName) { this.guestName = guestName; }
     public void setRoomType(String type) { this.roomType = type; }
     public void setTotalAmount(double amount) { this.totalAmount = amount; }
     public void setPaymentMethod(String method) { this.paymentMethod = method; }
@@ -23,6 +25,8 @@ public class Payment {
     public int getReservationId() { return reservationId; }
 
     public String getReservationNumber() { return reservationNumber; }
+    public String getGuestName() { return guestName; }
+
     public String getRoomType() { return roomType; }
     public double getTotalAmount() { return totalAmount; }
     public String getPaymentMethod() { return paymentMethod; }

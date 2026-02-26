@@ -144,7 +144,11 @@
         <i class="fa-solid fa-receipt fa-2x me-3 text-muted opacity-50"></i>
         <h2>Payment Ledger</h2>
     </div>
-
+ <div class="mt-5">
+        <a href="dashboard.jsp" class="back-link">
+            <i class="fa-solid fa-chevron-left me-2"></i>Exit to Dashboard
+        </a>
+    </div>
     <div class="search-card">
         <form action="viewPayments" method="get">
             <div class="row g-3 align-items-end">
@@ -168,51 +172,42 @@
     <div class="payment-table-card">
         <div class="table-responsive">
             <table class="payment-table table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th class="ps-4">Internal ID</th>
-                        <th>Res. Number</th>
-                        <th>Accommodation</th>
-                        <th>Settled Amount</th>
-                        <th>Method</th>
-                        <th class="text-end pe-4">Processing Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <%
-                        List<Payment> payments = (List<Payment>) request.getAttribute("payments");
+               <thead>
+                   <tr>
+                       <th class="ps-4">Internal ID</th>
+                       <th>Guest Name</th> <th>Res. Number</th>
+                       <th>Accommodation</th>
+                       <th>Settled Amount</th>
+                       <th>Method</th>
+                       <th class="text-end pe-4">Processing Date</th>
+                   </tr>
+               </thead>
+               <tbody>
+                   <%
+                       List<Payment> payments = (List<Payment>) request.getAttribute("payments");
+                       if (payments != null && !payments.isEmpty()) {
+                           for (Payment p : payments) {
+                   %>
+                       <tr>
+                           <td class="ps-4 text-muted small">#<%= p.getReservationId() %></td>
+                           <td class="fw-bold"><%= p.getGuestName() != null ? p.getGuestName() : "N/A" %></td>
 
-                        if (payments != null && !payments.isEmpty()) {
-                            for (Payment p : payments) {
-                    %>
-                        <tr>
-                            <td class="ps-4 text-muted small">#<%= p.getReservationId() %></td>
-                            <td class="fw-bold" style="color: var(--deep-sage)"><%= p.getReservationNumber() %></td>
-                            <td><%= p.getRoomType() %></td>
-                            <td class="fw-bold" style="color: var(--primary-sage)">LKR <%= p.getTotalAmount() %></td>
-                            <td><span class="badge rounded-pill method-badge"><%= p.getPaymentMethod() %></span></td>
-                            <td class="text-muted small text-end pe-4"><%= p.getPaymentDate() %></td>
-                        </tr>
-                    <%
-                            }
-                        } else {
-                    %>
-                        <tr>
-                            <td colspan="6" class="text-center py-5 text-muted italic">
-                                <i class="fa-solid fa-circle-info me-2"></i> No transaction records found for this query.
-                            </td>
-                        </tr>
-                    <% } %>
-                </tbody>
+                           <td class="text-primary fw-bold"><%= p.getReservationNumber() %></td>
+                           <td><%= p.getRoomType() %></td>
+                           <td class="fw-bold" style="color: var(--primary-sage)">LKR <%= p.getTotalAmount() %></td>
+                           <td><span class="badge rounded-pill method-badge"><%= p.getPaymentMethod() %></span></td>
+                           <td class="text-muted small text-end pe-4"><%= p.getPaymentDate() %></td>
+                       </tr>
+                   <%
+                           }
+                       }
+                   %>
+               </tbody>
             </table>
         </div>
     </div>
 
-    <div class="mt-5">
-        <a href="dashboard.jsp" class="back-link">
-            <i class="fa-solid fa-chevron-left me-2"></i>Exit to Dashboard
-        </a>
-    </div>
+
 </div>
 
 <footer class="text-center mt-5 opacity-50">

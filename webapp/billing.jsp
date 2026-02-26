@@ -147,6 +147,9 @@
             <form action="billing" method="post">
                 <input type="hidden" name="reservationId" value="<%= bill.getReservationId() %>">
                 <input type="hidden" name="resNum" value="${resNum}">
+                <input type="hidden" name="guestName" value="${guestName}">
+                <input type="hidden" name="resNum" value="${resNum}">
+                <input type="hidden" name="reservationId" value="${bill.reservationId}">
                 <input type="hidden" name="roomType" value="<%= bill.getRoomType() %>">
                 <input type="hidden" name="totalAmount" id="totalAmountHidden" value="${bill.total}">
 

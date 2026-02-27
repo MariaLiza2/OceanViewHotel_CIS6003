@@ -134,10 +134,10 @@
             <i class="fa-solid fa-calendar-plus"></i>
             <h4>Reservation</h4>
         </a>
-        <a href="viewReservations" class="nav-card">
-            <i class="fa-solid fa-list-check"></i>
-            <h4>Reservation List</h4>
-        </a>
+       <a href="manageReservation" class="nav-card">
+           <i class="fa-solid fa-list-check"></i>
+           <h4>Manage Reservations</h4>
+       </a>
     </div>
 
     <div class="card-grid">

@@ -207,6 +207,7 @@
                         <td>
                             <span class="badge-res <%= badgeClass %>"><%= currentStatus.toUpperCase() %></span>
                         </td>
+
                         <td class="text-end">
                             <% if("PAID".equalsIgnoreCase(currentStatus)) { %>
                                 <span class="text-muted small fw-bold"><i class="fa-solid fa-check-double me-1"></i> Completed</span>

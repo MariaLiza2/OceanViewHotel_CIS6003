@@ -133,7 +133,7 @@
         </div>
 
         <div class="col-md-4">
-            <a href="ManageUsersServlet" class="nav-card shadow-sm">
+            <a href="adminreports" class="nav-card shadow-sm">
                 <div class="icon-circle">
                     <i class="fa-solid fa-chart-line"></i>
                 </div>

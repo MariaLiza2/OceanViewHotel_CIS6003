@@ -6,21 +6,16 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
-    // Update these details based on your SQL Server Instance
-    // If you have a named instance (like SQLEXPRESS), use: localhost\\SQLEXPRESS
     private static final String URL = "jdbc:sqlserver://localhost:1433;"
             + "databaseName=oceanview_db;"
             + "integratedSecurity=true;"
-            + "encrypt=false;" // Required for SQL Server 2014 compatibility
+            + "encrypt=false;"
             + "trustServerCertificate=true;";
 
     public static Connection getConnection() {
         Connection con = null;
         try {
-            // Load the Microsoft SQL Server Driver
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-
-            // Attempt to establish the connection
             con = DriverManager.getConnection(URL);
 
             if (con != null) {

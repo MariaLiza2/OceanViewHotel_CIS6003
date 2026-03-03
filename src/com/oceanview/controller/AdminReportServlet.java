@@ -17,7 +17,6 @@ import com.itextpdf.text.pdf.*;
 @WebServlet("/adminreports")
 public class AdminReportServlet extends HttpServlet {
 
-    // Define the Sage Green color for branding
     private static final BaseColor SAGE_GREEN = new BaseColor(74, 93, 69);
 
     @Override
@@ -43,7 +42,7 @@ public class AdminReportServlet extends HttpServlet {
                     request.getRequestDispatcher("/admin-pay-list.jsp").forward(request, response);
                 }
             } else {
-                // Default view (Dashboard)
+
                 request.getRequestDispatcher("/admin-reports-view.jsp").forward(request, response);
             }
         } catch (Exception e) {
@@ -71,7 +70,7 @@ public class AdminReportServlet extends HttpServlet {
             PdfPTable table = new PdfPTable(4);
             table.setWidthPercentage(100);
 
-            // Header Cells
+
             String[] headers = {"Res ID", "Method", "Time", "Amount (LKR)"};
             for (String h : headers) {
                 PdfPCell cell = new PdfPCell(new Phrase(h, FontFactory.getFont(FontFactory.HELVETICA_BOLD)));
@@ -79,7 +78,6 @@ public class AdminReportServlet extends HttpServlet {
                 table.addCell(cell);
             }
 
-            // Updated SQL to use total_amount as per your database schema
             String sql = "SELECT reservation_id, payment_method, payment_date, total_amount FROM Payments WHERE CAST(payment_date AS DATE) = ?";
             try (PreparedStatement ps = con.prepareStatement(sql)) {
                 ps.setString(1, date);
@@ -107,7 +105,6 @@ public class AdminReportServlet extends HttpServlet {
             e.printStackTrace();
         }
     }
-    // --- PDF GENERATION: RESERVATIONS ---
     private void generateReservationPDF(HttpServletRequest request, HttpServletResponse response, String date) throws IOException {
         response.setContentType("application/pdf");
         response.setHeader("Content-Disposition", "attachment; filename=Reservation_Report_" + date + ".pdf");
@@ -127,7 +124,7 @@ public class AdminReportServlet extends HttpServlet {
             PdfPTable table = new PdfPTable(5);
             table.setWidthPercentage(100);
 
-            // Table Headers
+
             String[] headers = {"Guest", "Room", "In", "Out", "Status"};
             for (String header : headers) {
                 PdfPCell cell = new PdfPCell(new Phrase(header, FontFactory.getFont(FontFactory.HELVETICA_BOLD)));
@@ -164,7 +161,6 @@ public class AdminReportServlet extends HttpServlet {
         }
     }
 
-    // --- DATABASE HELPERS ---
     private List<Reservation> fetchReservationsFromDB(String date) throws SQLException {
         List<Reservation> list = new ArrayList<>();
         String sql = "SELECT * FROM Reservations WHERE CAST(booking_date AS DATE) = ?";
@@ -187,7 +183,7 @@ public class AdminReportServlet extends HttpServlet {
 
     private List<Map<String, Object>> fetchPaymentsFromDB(String date) throws SQLException {
         List<Map<String, Object>> list = new ArrayList<>();
-        // Note: I am selecting total_amount here
+
         String sql = "SELECT reservation_id, total_amount, payment_method, payment_date FROM Payments WHERE CAST(payment_date AS DATE) = ?";
         try (Connection con = DBConnection.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, date);

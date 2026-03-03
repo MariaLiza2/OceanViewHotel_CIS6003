@@ -6,34 +6,28 @@ public class Room {
     private double rate;
     private boolean available;
     private String description;
+    private String roomNumber;
 
-    // 1. Default Constructor
     public Room() {
     }
 
-    // 2. Constructor for DataStore (type, available)
     public Room(String type, boolean available) {
         this.type = type;
         this.available = available;
     }
 
-    // 3. FIXED: Constructor for DataStore (type, rate, available)
-    // This removes the red lines in image_18c4ae.png
     public Room(String type, double rate, boolean available) {
         this.type = type;
         this.rate = rate;
         this.available = available;
     }
 
-    // 4. Full Constructor including Description
     public Room(String type, double rate, boolean available, String description) {
         this.type = type;
         this.rate = rate;
         this.available = available;
         this.description = description;
     }
-
-    // --- Getters and Setters ---
 
     public int getRoomId() { return roomId; }
     public void setRoomId(int roomId) { this.roomId = roomId; }
@@ -49,4 +43,7 @@ public class Room {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
+    public String getRoomNumber() { return roomNumber; }
+    public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
 }

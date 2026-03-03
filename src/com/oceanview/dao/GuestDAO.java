@@ -10,7 +10,7 @@ public class GuestDAO {
 
     public static List<Guest> getAllGuests() {
         List<Guest> list = new ArrayList<>();
-        // Fetches data to display in registered-guests.jsp
+
         String sql = "SELECT * FROM guest_details ORDER BY guest_id DESC";
 
         try (Connection con = DBConnection.getConnection();
@@ -35,7 +35,7 @@ public class GuestDAO {
         String insertSql = "INSERT INTO guest_details (guest_name, contact_number, address) VALUES (?, ?, ?)";
 
         try (Connection con = DBConnection.getConnection()) {
-            // Debug: Check what is actually being sent to the DB
+
             System.out.println("Saving Guest: " + guest.getName());
             System.out.println("Address Length: " + (guest.getAddress() != null ? guest.getAddress().length() : 0));
 
@@ -48,7 +48,7 @@ public class GuestDAO {
             System.out.println("Update successful! Rows affected: " + rows);
 
         } catch (SQLException e) {
-            // This is where your 'Truncated' error was caught
+
             System.out.println("SQL ERROR in saveGuest: " + e.getMessage());
             e.printStackTrace();
         }

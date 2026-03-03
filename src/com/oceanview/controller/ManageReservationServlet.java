@@ -9,7 +9,7 @@ import javax.servlet.http.*;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/manageReservation") // Changed to SINGULAR to match your URL
+@WebServlet("/manageReservation")
 public class ManageReservationServlet extends HttpServlet {
 
     private ReservationDAO reservationDAO = new ReservationDAOImpl();
@@ -18,6 +18,7 @@ public class ManageReservationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
+        String searchName = request.getParameter("searchName"); // Capture search term
 
         try {
             if ("view".equals(action)) {
@@ -34,17 +35,23 @@ public class ManageReservationServlet extends HttpServlet {
             }
             else if ("delete".equals(action)) {
                 int id = Integer.parseInt(request.getParameter("id"));
-                reservationDAO.deleteReservation(id);
-                response.sendRedirect("manage-reservation.jsp?msg=deleted");
+                boolean isDeleted = reservationDAO.deleteReservation(id);
+                response.sendRedirect("manageReservation?msg=" + (isDeleted ? "deleted" : "error"));
             }
             else {
-                // Default: Fetch all and forward to JSP
-                List<Reservation> list = reservationDAO.getAllReservations();
+
+                List<Reservation> list;
+                if (searchName != null && !searchName.trim().isEmpty()) {
+                    list = reservationDAO.searchReservationsByName(searchName);
+                } else {
+                    list = reservationDAO.getAllReservations();
+                }
                 request.setAttribute("reservations", list);
                 request.getRequestDispatcher("manage-reservation.jsp").forward(request, response);
             }
         } catch (Exception e) {
-            response.sendRedirect("manage-reservation.jsp?error=true");
+            e.printStackTrace();
+            response.sendRedirect("manage-reservation.jsp?error=exception");
         }
     }
 
@@ -57,14 +64,22 @@ public class ManageReservationServlet extends HttpServlet {
             r.setReservationId(id);
             r.setGuestName(request.getParameter("guestName"));
             r.setRoomType(request.getParameter("roomType"));
+
+
+            r.setRoomNumber(request.getParameter("roomNumber"));
+
             r.setCheckIn(java.sql.Date.valueOf(request.getParameter("checkIn")));
             r.setCheckOut(java.sql.Date.valueOf(request.getParameter("checkOut")));
 
             if (reservationDAO.updateReservation(r)) {
-                response.sendRedirect("manage-reservation.jsp?msg=updated");
+
+                response.sendRedirect("manageReservation?msg=updated");
+            } else {
+                response.sendRedirect("manageReservation?error=update_failed");
             }
         } catch (Exception e) {
-            response.sendRedirect("manage-reservation.jsp?error=update_failed");
+            e.printStackTrace();
+            response.sendRedirect("manageReservation?error=invalid_data");
         }
     }
 }

@@ -95,19 +95,18 @@ public class BillingServlet extends HttpServlet {
 
             int resId = Integer.parseInt(resIdStr);
 
-            // Clean currency symbols or spaces if they exist in the input
+
             String cleanTotal = totalStr.replace("LKR", "").replace(",", "").trim();
             double total = Double.parseDouble(cleanTotal);
             int days = (daysStr != null && !daysStr.isEmpty()) ? Integer.parseInt(daysStr) : 1;
 
-            // 1. DATA VALIDATION: Fetch fresh data to ensure resNum and guestName are NOT NULL
+
             Reservation res = reservationDAO.getReservationById(resId);
             if (res == null) throw new Exception("Reservation record not found.");
 
             String guestName = (res.getGuestName() != null) ? res.getGuestName() : "Guest";
 
-            // Fix for the Unique Constraint <NULL> error:
-            // If resNum is null from form, take it from database. If still null, generate a fallback.
+
             if (resNum == null || resNum.trim().isEmpty() || resNum.equalsIgnoreCase("null")) {
                 resNum = (res.getReservationNumber() != null) ? res.getReservationNumber() : "OVH-RES-" + resId;
             }
@@ -117,7 +116,7 @@ public class BillingServlet extends HttpServlet {
             try (Connection conn = com.oceanview.util.DBConnection.getConnection()) {
                 conn.setAutoCommit(false);
 
-                // Duplicate Check to prevent crashes
+
                 String checkSql = "SELECT COUNT(*) FROM Payments WHERE reservation_id = ?";
                 try (PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
                     checkPs.setInt(1, resId);
@@ -130,7 +129,7 @@ public class BillingServlet extends HttpServlet {
                     }
                 }
 
-                // Database Insert
+
                 String sql = "INSERT INTO Payments (reservation_id, reservation_number, room_type, total_amount, payment_method, payment_date) VALUES (?, ?, ?, ?, ?, GETDATE())";
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setInt(1, resId);
@@ -148,7 +147,7 @@ public class BillingServlet extends HttpServlet {
                 }
             }
 
-            // 2. Refresh the Session for PDF generation
+
             HttpSession session = request.getSession();
             Bill bill = new Bill();
             bill.setReservationId(resId);
@@ -180,7 +179,7 @@ public class BillingServlet extends HttpServlet {
             return;
         }
 
-        // Fresh fetch for PDF to avoid "N/A"
+
         String guestName = "Valued Guest";
         String resNum = "N/A";
         try {
@@ -215,7 +214,7 @@ public class BillingServlet extends HttpServlet {
             document.add(new com.itextpdf.text.Paragraph("123 Beach Road, Galle, Sri Lanka", new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10)));
             document.add(new com.itextpdf.text.Paragraph(" "));
 
-            // Info Table
+
             com.itextpdf.text.pdf.PdfPTable infoTable = new com.itextpdf.text.pdf.PdfPTable(2);
             infoTable.setWidthPercentage(100);
             infoTable.addCell(getNoBorderCell("RECEIPT #: " + receiptNo));

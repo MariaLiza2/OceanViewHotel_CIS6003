@@ -26,7 +26,7 @@ public class PaymentListServlet extends HttpServlet {
         try (Connection conn = com.oceanview.util.DBConnection.getConnection()) {
             StringBuilder sql = new StringBuilder();
 
-            // We use a JOIN to get the guest_name from the Reservations table
+
             sql.append("SELECT p.*, r.guest_name ");
             sql.append("FROM Payments p ");
             sql.append("JOIN Reservations r ON p.reservation_id = r.reservation_id ");
@@ -52,7 +52,6 @@ public class PaymentListServlet extends HttpServlet {
                 p.setPaymentMethod(rs.getString("payment_method"));
                 p.setPaymentDate(rs.getTimestamp("payment_date"));
 
-                // POPULATE THE NAME HERE:
                 p.setGuestName(rs.getString("guest_name"));
 
                 paymentList.add(p);

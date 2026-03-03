@@ -144,11 +144,9 @@
         <i class="fa-solid fa-receipt fa-2x me-3 text-muted opacity-50"></i>
         <h2>Payment Ledger</h2>
     </div>
- <div class="mt-5">
-        <a href="dashboard.jsp" class="back-link">
-            <i class="fa-solid fa-chevron-left me-2"></i>Exit to Dashboard
-        </a>
-    </div>
+ <div class="d-flex justify-content-between align-items-center mb-4">
+         <a href="dashboard.jsp" class="btn btn-sm btn-outline-secondary">BACK TO DASHBOARD</a>
+     </div>
     <div class="search-card">
         <form action="viewPayments" method="get">
             <div class="row g-3 align-items-end">

@@ -114,9 +114,9 @@
             <h2>Guest Directory</h2>
             <small class="text-muted text-uppercase" style="letter-spacing: 1px;">Master Records - Authorized Access Only</small>
         </div>
-        <a href="dashboard.jsp" class="back-link">
-            <i class="fa-solid fa-arrow-left me-2"></i>Dashboard
-        </a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+                 <a href="dashboard.jsp" class="btn btn-sm btn-outline-secondary">BACK TO DASHBOARD</a>
+             </div>
     </div>
 
     <div class="table-responsive">

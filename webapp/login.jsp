@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <title>Staff Portal | Ocean View Resort</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -132,10 +133,24 @@
 <body>
 
 <div class="login-card">
-    <div class="brand-logo">
-        <i class="fa-solid fa-compass-drafting"></i>
+
+<div style="text-align: center; padding-top: 40px; margin-bottom: 40px; font-family: 'Segoe UI', Arial, sans-serif;">
+
+    <h3 style="color: #4A5D45; font-weight: 800; letter-spacing: 5px; text-transform: uppercase; margin: 0 0 10px 0;">
+        Ocean View Hotel
+    </h3>
+
+    <h5 style="color: #6c757d; font-weight: 300; font-size: 1.3rem; letter-spacing: 2px; margin: 0;">
+        No 261, Church Street, Galle.
+    </h5>
+
+    <div style="display: flex; align-items: center; justify-content: center; margin-top: 25px;">
+        <div style="height: 1px; width: 80px; background-color: #C2956E; opacity: 0.6;"></div>
+        <span style="margin: 0 20px; color: #C2956E; font-size: 1.5rem; line-height: 1;">🦀</span>
+        <div style="height: 1px; width: 80px; background-color: #C2956E; opacity: 0.6;"></div>
     </div>
-    <h2>Staff Access</h2>
+</div>
+    <h4>Staff Access</h4>
 
     <form action="${pageContext.request.contextPath}/login" method="post">
         <div class="mb-3">

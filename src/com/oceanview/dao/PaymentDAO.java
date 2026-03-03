@@ -10,7 +10,7 @@ public class PaymentDAO {
 
     public List<Payment> getAllPayments() {
         List<Payment> list = new ArrayList<>();
-        // SQL JOIN to pull the guest name from the reservations table
+
         String sql = "SELECT p.*, r.guestName FROM payments p " +
                 "JOIN reservations r ON p.reservationId = r.reservationId " +
                 "ORDER BY p.paymentDate DESC";
@@ -28,7 +28,7 @@ public class PaymentDAO {
                 p.setPaymentMethod(rs.getString("paymentMethod"));
                 p.setPaymentDate(Timestamp.valueOf(rs.getString("paymentDate")));
 
-                // This is the missing piece!
+
                 p.setGuestName(rs.getString("guestName"));
 
                 list.add(p);

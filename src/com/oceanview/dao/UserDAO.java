@@ -12,7 +12,7 @@ public class UserDAO {
         User user = null;
         String sql = "SELECT * FROM users WHERE username = ?";
 
-        // Get the connection first to check for null
+
         Connection con = DBConnection.getConnection();
 
         if (con == null) {
@@ -20,7 +20,7 @@ public class UserDAO {
             return null;
         }
 
-        // Use try-with-resources to ensure the connection and statement close properly
+
         try (PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, username);
@@ -47,12 +47,11 @@ public class UserDAO {
     }
 
     public User validateUser(String username, String password) {
-        // Basic check for empty inputs before hitting the DB
+
         if (username == null || password == null) return null;
 
         User user = getUserByUsername(username);
 
-        // Compare plain text passwords with trim to handle DB padding
         if (user != null && password.trim().equals(user.getPassword().trim())) {
             return user;
         }

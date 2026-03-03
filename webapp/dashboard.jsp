@@ -122,12 +122,27 @@
     </style>
 </head>
 <body>
+<div style="text-align: center; padding: 20px 0; background-color: (--bg-sage-light);">
 
-<div class="main-container text-center">
-    <div class="dashboard-header">
-        <h2>Welcome, <%= user.getUsername() %></h2>
-        <span class="role-badge"><%= user.getRole() %></span>
+    <h1 style="color: #4A5D45; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; margin: 0; padding-bottom: 5px;">
+        Ocean View Hotel
+    </h1>
+
+    <p style="color: #7f8c8d; font-size: 1rem; margin: 0; padding-bottom: 10px;">
+        No 261, Church Street, Galle.
+    </p>
+
+    <div style="display: flex; align-items: center; justify-content: center; margin: 5px 0;">
+        <div style="height: 1px; width: 50px; background-color: #d4a373; opacity: 0.5;"></div>
+        <span style="margin: 0 15px; font-size: 1.5rem;">&#129408;</span>
+        <div style="height: 1px; width: 50px; background-color: #d4a373; opacity: 0.5;"></div>
     </div>
+
+    <h2>Welcome, <%= user.getUsername() %></h2>
+          <span class="role-badge"><%= user.getRole() %></span>
+
+</div>
+<div class="main-container text-center">
 
     <div class="card-grid">
         <a href="reservation.jsp" class="nav-card">

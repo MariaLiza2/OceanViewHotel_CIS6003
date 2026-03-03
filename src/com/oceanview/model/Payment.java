@@ -10,7 +10,7 @@ public class Payment {
     private String paymentMethod;
     private java.sql.Timestamp paymentDate;
 
-    // --- SETTERS (These fix the Servlet while-loop errors) ---
+    // SETTERS
     public void setReservationId(int id) { this.reservationId = id; }
     public void setReservationNumber(String num) { this.reservationNumber = num; }
     public void setGuestName(String guestName) { this.guestName = guestName; }
@@ -19,9 +19,8 @@ public class Payment {
     public void setPaymentMethod(String method) { this.paymentMethod = method; }
     public void setPaymentDate(java.sql.Timestamp date) { this.paymentDate = date; }
 
-    // --- GETTERS (These fix the JSP 500 compilation errors) ---
+    // GETTERS
 
-    // ADD THIS LINE TO FIX THE CURRENT ERROR:
     public int getReservationId() { return reservationId; }
 
     public String getReservationNumber() { return reservationNumber; }

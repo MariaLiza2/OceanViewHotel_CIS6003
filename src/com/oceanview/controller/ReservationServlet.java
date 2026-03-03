@@ -24,10 +24,10 @@ public class ReservationServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1. Initialize DAO to fetch data
+
         ReservationDAO dao = new ReservationDAOImpl();
 
-        // 2. Get search parameter (if any)
+
         String searchName = request.getParameter("searchName");
         List<Reservation> reservations;
 
@@ -37,10 +37,10 @@ public class ReservationServlet extends HttpServlet {
             reservations = dao.getAllReservations();
         }
 
-        // 3. Set the list as a request attribute
+
         request.setAttribute("reservations", reservations);
 
-        // 4. Forward to the history JSP page
+
         request.getRequestDispatcher("reservationList.jsp").forward(request, response);
     }
 
@@ -52,28 +52,24 @@ public class ReservationServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try {
-            // 1. Capture parameters from the registration form
+
             String name = request.getParameter("guestName");
             String address = request.getParameter("address");
-            String contact = request.getParameter("contactNumber"); // Ensure this matches your form name
+            String contact = request.getParameter("contactNumber");
             String roomType = request.getParameter("roomType");
+            String roomNumber = request.getParameter("roomNumber"); // Captured from Form
             String checkInStr = request.getParameter("checkIn");
             String checkOutStr = request.getParameter("checkOut");
 
-            // --- NEW: GUEST DIRECTORY LOGIC ---
-            // We save the guest identity first. GuestDAO.saveGuest handles duplicate checks.
-            Guest newGuest = new Guest(name, contact, address);
-            GuestDAO.saveGuest(newGuest);
-            // ----------------------------------
 
-            // 2. Map form data to the Reservation Model
             Reservation r = new Reservation();
             r.setGuestName(name);
             r.setAddress(address);
             r.setContactNumber(contact);
             r.setRoomType(roomType);
+            r.setRoomNumber(roomNumber);
 
-            // 3. Parse Dates
+
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             if (checkInStr != null && !checkInStr.isEmpty()) {
                 r.setCheckIn(sdf.parse(checkInStr));
@@ -82,20 +78,21 @@ public class ReservationServlet extends HttpServlet {
                 r.setCheckOut(sdf.parse(checkOutStr));
             }
 
-            // 4. Call the DAO to save the reservation record
+
             ReservationDAO dao = new ReservationDAOImpl();
             boolean success = dao.addReservation(r);
 
             if (success) {
-                // Success: Redirect to view history
+
                 response.sendRedirect(request.getContextPath() + "/addReservation");
             } else {
                 request.setAttribute("errorMessage", "Database insertion failed.");
-                request.getRequestDispatcher("reservation_form.jsp").forward(request, response);
+
+                request.getRequestDispatcher("reservationList.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ServletException("Error processing reservation: " + e.getMessage());
+            throw new ServletException("Error processing: " + e.getMessage());
         }
-    }}
+        }}

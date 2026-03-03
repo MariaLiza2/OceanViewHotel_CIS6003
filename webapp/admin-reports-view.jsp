@@ -46,6 +46,11 @@
                         <button type="submit" name="action" value="view" class="btn btn-outline-secondary w-100">View on Screen</button>
                     </form>
                 </div>
+                <div class="mt-5">
+                        <a href="admin-dashboard.jsp" class="back-link">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Exit to Admin Center
+                        </a>
+                    </div>
             </div>
         </div>
     </div>

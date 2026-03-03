@@ -134,8 +134,22 @@
 <body>
 
 <div class="login-card">
-    <div class="brand-icon">
-        <i class="fa-solid fa-user-shield"></i>
+
+    <div style="text-align: center; padding-top: 40px; margin-bottom: 40px; font-family: 'Segoe UI', Arial, sans-serif;">
+
+        <h3 style="color: #4A5D45; font-weight: 800; letter-spacing: 5px; text-transform: uppercase; margin: 0 0 10px 0;">
+            Ocean View Hotel
+        </h3>
+
+        <h5 style="color: #6c757d; font-weight: 300; font-size: 1.3rem; letter-spacing: 2px; margin: 0;">
+            No 261, Church Street, Galle.
+        </h5>
+
+        <div style="display: flex; align-items: center; justify-content: center; margin-top: 25px;">
+            <div style="height: 1px; width: 80px; background-color: #C2956E; opacity: 0.6;"></div>
+            <span style="margin: 0 20px; color: #C2956E; font-size: 1.5rem; line-height: 1;">🦀</span>
+            <div style="height: 1px; width: 80px; background-color: #C2956E; opacity: 0.6;"></div>
+        </div>
     </div>
     <h2>Admin Access</h2>
 

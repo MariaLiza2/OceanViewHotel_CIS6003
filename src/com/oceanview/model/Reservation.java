@@ -44,4 +44,13 @@ public class Reservation {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-}
+    private java.sql.Timestamp bookingDate;
+
+    public java.sql.Timestamp getBookingDate() { return bookingDate; }
+    public void setBookingDate(java.sql.Timestamp bookingDate) { this.bookingDate = bookingDate; }
+
+
+        private String roomNumber; // Ensure this exists!
+        public String getRoomNumber() { return roomNumber; }
+        public void setRoomNumber(String rn) { this.roomNumber = rn; }
+    }

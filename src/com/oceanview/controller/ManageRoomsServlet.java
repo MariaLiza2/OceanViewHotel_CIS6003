@@ -30,7 +30,7 @@ public class ManageRoomsServlet extends HttpServlet {
                 if (type != null && rateStr != null && desc != null) {
                     double rate = Double.parseDouble(rateStr);
                     boolean isAvailable = Boolean.parseBoolean(statusStr);
-                    // Updated DAO call to include description and initial status
+
                     RoomDAO.addRoom(type, rate, desc, isAvailable);
                 }
 
@@ -52,7 +52,7 @@ public class ManageRoomsServlet extends HttpServlet {
                     int id = Integer.parseInt(idStr);
                     double rate = Double.parseDouble(rateStr);
                     boolean isAvailable = Boolean.parseBoolean(statusStr);
-                    // Updated DAO call to save changes to description and status
+
                     RoomDAO.updateRoom(id, type, rate, desc, isAvailable);
                 }
 
@@ -70,7 +70,7 @@ public class ManageRoomsServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        // Always redirect or forward correctly after processing
+
         if (action != null) {
             response.sendRedirect("ManageRoomsServlet");
         } else {
@@ -79,7 +79,7 @@ public class ManageRoomsServlet extends HttpServlet {
             request.getRequestDispatcher("manage-rooms.jsp").forward(request, response);
         }
     }
-    // Even if the form accidentally sends a POST, this redirects it to our working logic
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);

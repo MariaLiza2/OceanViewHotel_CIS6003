@@ -30,12 +30,12 @@ public class LoginServlet extends HttpServlet {
         User user = userDao.validateUser(username, password);
 
         if (user != null) {
-            // Success: Create session and store user data
+
             HttpSession session = req.getSession();
             session.setAttribute("loggedUser", user);
             session.setAttribute("role", user.getRole());
 
-            // Redirect to dashboard
+
             resp.sendRedirect(req.getContextPath() + "/dashboard.jsp");
         } else {
             // Failure: Back to login with error

@@ -10,7 +10,7 @@ public class ReservationServiceImpl extends ReservationService {
     private ReservationDAO dao = new ReservationDAOImpl();
 
     public boolean saveReservation(Reservation reservation) {
-        // Calls the real DAO method, not the ghost one
+        // Calls the real DAO method
         return dao.addReservation(reservation);
     }
 

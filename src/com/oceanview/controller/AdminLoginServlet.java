@@ -17,7 +17,7 @@ import java.io.IOException;
             String username = request.getParameter("username");
             String password = request.getParameter("password");
 
-            // hardcoded or fetched from DB
+
             if ("admin".equals(username) && "admin123".equals(password)) {
 
                 HttpSession session = request.getSession();

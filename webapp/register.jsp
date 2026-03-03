@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Staff Registration | Ocean View</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -122,11 +123,27 @@
                         <div class="brand-icon">
                             <i class="fa-solid fa-user-plus"></i>
                         </div>
+                            <div style="text-align: center; padding-top: 40px; margin-bottom: 40px; font-family: 'Segoe UI', Arial, sans-serif;">
+
+                                <h3 style="color: #4A5D45; font-weight: 800; letter-spacing: 5px; text-transform: uppercase; margin: 0 0 10px 0;">
+                                    Ocean View Hotel
+                                </h3>
+
+                                <h5 style="color: #6c757d; font-weight: 300; font-size: 1.3rem; letter-spacing: 2px; margin: 0;">
+                                    No 261, Church Street, Galle.
+                                </h5>
+
+                                <div style="display: flex; align-items: center; justify-content: center; margin-top: 25px;">
+                                    <div style="height: 1px; width: 80px; background-color: #C2956E; opacity: 0.6;"></div>
+                                    <span style="margin: 0 20px; color: #C2956E; font-size: 1.5rem; line-height: 1;">🦀</span>
+                                    <div style="height: 1px; width: 80px; background-color: #C2956E; opacity: 0.6;"></div>
+                                </div>
+                            </div>
                         <h2 class="header-title">Create Account</h2>
                         <p class="text-muted small">Access the OceanView Management System</p>
                     </div>
 
-                    <form action="registerServlet" method="POST">
+                    <form action="register" method="post">
                         <div class="mb-3">
                             <label class="form-label">Username</label>
                             <div class="input-group">

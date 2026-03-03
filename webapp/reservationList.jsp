@@ -151,9 +151,9 @@
 <div class="container main-card">
     <div class="header-section d-flex justify-content-between align-items-center">
         <h2>Guest Ledger</h2>
-        <a href="dashboard.jsp" class="back-link">
-            <i class="fa-solid fa-arrow-left me-2"></i>Dashboard
-        </a>
+       <div class="d-flex justify-content-between align-items-center mb-4">
+                <a href="dashboard.jsp" class="btn btn-sm btn-outline-secondary">BACK TO DASHBOARD</a>
+            </div>
     </div>
 
     <div class="search-box">

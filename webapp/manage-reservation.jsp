@@ -2,8 +2,11 @@
 <%@ page import="java.util.List, com.oceanview.model.Reservation, com.oceanview.dao.ReservationDAO, com.oceanview.dao.ReservationDAOImpl" %>
 
 <%
-    // Ensure data is present even on direct JSP access
+    // Try to get the list from the Servlet first
     List<Reservation> list = (List<Reservation>) request.getAttribute("reservations");
+
+    // If you went to the JSP directly (or after a redirect),
+    // the attribute will be null. You MUST fetch it manually here.
     if (list == null) {
         ReservationDAO dao = new ReservationDAOImpl();
         list = dao.getAllReservations();
@@ -39,7 +42,9 @@
 <div class="container main-card">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="header-title m-0">ADMIN MANAGEMENT</h2>
-        <a href="dashboard.jsp" class="btn btn-sm btn-outline-secondary">BACK TO DASHBOARD</a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+                 <a href="dashboard.jsp" class="btn btn-sm btn-outline-secondary">BACK TO DASHBOARD</a>
+             </div>
     </div>
 
     <div class="mb-4 p-3 rounded" style="background: #f8f9fa;">
@@ -54,34 +59,39 @@
     </div>
 
     <table class="table">
-        <thead>
-            <tr>
-                <th>Ref ID</th>
-                <th>Guest Name</th>
-                <th>Room Type</th>
-                <th>Stay Dates</th>
-                <th class="text-end">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% if (list != null && !list.isEmpty()) {
-                for (Reservation r : list) { %>
+            <thead>
                 <tr>
-                    <td class="text-muted">#<%= r.getReservationNumber() %></td>
-                    <td class="fw-bold"><%= r.getGuestName() %></td>
-                    <td><span class="badge bg-light text-dark"><%= r.getRoomType() %></span></td>
-                    <td class="small text-muted"><%= r.getCheckIn() %> — <%= r.getCheckOut() %></td>
-                    <td class="text-end">
-                        <a href="manageReservation?action=view&id=<%= r.getReservationId() %>" class="action-btn view-btn"><i class="fa-solid fa-eye"></i></a>
-                        <a href="manageReservation?action=edit&id=<%= r.getReservationId() %>" class="action-btn edit-btn"><i class="fa-solid fa-pen"></i></a>
-                        <a href="manageReservation?action=delete&id=<%= r.getReservationId() %>" class="action-btn delete-btn" onclick="return confirm('Delete this record?')"><i class="fa-solid fa-trash"></i></a>
-                    </td>
+                    <th>Ref ID</th>
+                    <th>Guest Name</th>
+                    <th>Room No.</th> <th>Room Type</th>
+                    <th>Stay Dates</th>
+                    <th class="text-end">Actions</th>
                 </tr>
-            <% } } else { %>
-                <tr><td colspan="5" class="text-center py-5 text-muted">No records found.</td></tr>
-            <% } %>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <% if (list != null && !list.isEmpty()) {
+                    for (Reservation r : list) { %>
+                    <tr>
+                        <td class="text-muted">#<%= r.getReservationNumber() %></td>
+                        <td class="fw-bold"><%= r.getGuestName() %></td>
+
+                        <td>
+                            <span class="badge <%= (r.getRoomNumber() == null) ? "bg-danger" : "bg-secondary" %> text-white">
+                                <%= (r.getRoomNumber() != null) ? r.getRoomNumber() : "R-PENDING" %>
+                            </span>
+                        </td>
+                        <td><span class="badge bg-light text-dark text-uppercase"><%= r.getRoomType() %></span></td>
+                        <td class="small text-muted"><%= r.getCheckIn() %> — <%= r.getCheckOut() %></td>
+                        <td class="text-end">
+                            <a href="manageReservation?action=view&id=<%= r.getReservationId() %>" class="action-btn view-btn"><i class="fa-solid fa-eye"></i></a>
+                            <a href="manageReservation?action=edit&id=<%= r.getReservationId() %>" class="action-btn edit-btn"><i class="fa-solid fa-pen"></i></a>
+                            <a href="manageReservation?action=delete&id=<%= r.getReservationId() %>" class="action-btn delete-btn" onclick="return confirm('Delete this record?')"><i class="fa-solid fa-trash"></i></a>
+                        </td>
+                    </tr>
+                <% } } else { %>
+                    <tr><td colspan="6" class="text-center py-5 text-muted">No records found.</td></tr> <% } %>
+            </tbody>
+        </table>
 </div>
 
 </body>

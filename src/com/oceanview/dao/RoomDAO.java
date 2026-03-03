@@ -12,7 +12,7 @@ import java.util.List;
 
 public class RoomDAO {
 
-        // 1. Get all rooms from database
+
     public static List<Room> getAllRooms() {
         List<Room> list = new ArrayList<>();
         try {
@@ -25,7 +25,7 @@ public class RoomDAO {
                 r.setRoomId(rs.getInt("room_id"));
                 r.setType(rs.getString("room_type"));
                 r.setRate(rs.getDouble("rate_per_day"));
-                // CRITICAL: Load description and availability from DB
+
                 r.setDescription(rs.getString("description"));
                 r.setAvailable(rs.getBoolean("is_available"));
                 list.add(r);
@@ -36,7 +36,7 @@ public class RoomDAO {
         return list;
     }
 
-    // 2. Add a new room (Updated with 4 parameters)
+
     public static boolean addRoom(String type, double rate, String description, boolean isAvailable) {
         String sql = "INSERT INTO rooms (room_type, rate_per_day, description, is_available) VALUES (?, ?, ?, ?)";
         try (Connection con = DBConnection.getConnection();
@@ -54,7 +54,7 @@ public class RoomDAO {
         }
     }
 
-    // 3. Delete a room
+
     public static void deleteRoom(int id) {
         String sql = "DELETE FROM rooms WHERE room_id = ?";
         try (Connection con = DBConnection.getConnection();
@@ -66,7 +66,7 @@ public class RoomDAO {
         }
     }
 
-    // 4. Update an existing room (Updated with 5 parameters)
+
     public static void updateRoom(int id, String type, double rate, String description, boolean isAvailable) {
         String sql = "UPDATE rooms SET room_type = ?, rate_per_day = ?, description = ?, is_available = ? WHERE room_id = ?";
         try (Connection con = DBConnection.getConnection();
@@ -84,7 +84,7 @@ public class RoomDAO {
         }
     }
 
-    // 5. Toggle Room Status
+
     public static void toggleRoomStatus(int id, boolean status) {
         String sql = "UPDATE rooms SET is_available = ? WHERE room_id = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -111,6 +111,6 @@ public class RoomDAO {
                 }
             }
         } catch (SQLException e) { e.printStackTrace(); }
-        return 0.0; // Return a valid number to avoid the curly bracket error
+        return 0.0;
     }
 }

@@ -17,6 +17,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <title>Admin Panel | Ocean View</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -108,16 +109,25 @@
 </head>
 <body>
 
-<div class="admin-header text-center">
-    <div class="container">
-        <h1 class="display-5 fw-bold">Management Terminal</h1>
-        <p class="lead opacity-75">Welcome back, <%= displayName %></p>
-        <div class="mt-3">
-             <a href="logout" class="btn-logout-panel">
-                 <i class="fa-solid fa-power-off me-2"></i>Secure Sign Out
-             </a>
-        </div>
+<div style="text-align: center; padding: 60px 20px 40px 20px; background-color: #f8f9f7; font-family: 'Segoe UI', Arial, sans-serif;">
+
+    <h1 style="color: #4A5D45; font-weight: 800; letter-spacing: 6px; text-transform: uppercase; margin: 0 0 10px 0; font-size: 2.8rem;">
+        Ocean View Hotel
+    </h1>
+
+    <h2 style="color: #7f8c8d; font-weight: 300; font-size: 1.2rem; letter-spacing: 2px; margin: 0; text-transform: capitalize;">
+        No 261, Church Street, Galle.
+    </h2>
+
+    <div style="display: flex; align-items: center; justify-content: center; margin-top: 30px;">
+        <div style="height: 1px; width: 100px; background-color: #d4a373; opacity: 0.5;"></div>
+        <span style="margin: 0 25px; color: #d4a373; font-size: 1.8rem; line-height: 1;">&#129408;</span>
+        <div style="height: 1px; width: 100px; background-color: #d4a373; opacity: 0.5;"></div>
     </div>
+
+    <p style="margin-top: 20px; color: #a5a5a5; font-style: italic; font-size: 0.9rem; letter-spacing: 1px;">
+        Management Terminal | Welcome back, admin
+    </p>
 </div>
 
 <div class="container">
@@ -128,7 +138,7 @@
                     <i class="fa-solid fa-hotel"></i>
                 </div>
                 <h5 class="fw-bold text-uppercase" style="letter-spacing: 1px;">Manage Rooms</h5>
-                <p class="text-muted text-center small mb-0">Edit inventory, room categories, and seasonal rates</p>
+                <p class="text-muted text-center small mb-0">Edit room categories and seasonal rates</p>
             </a>
         </div>
 

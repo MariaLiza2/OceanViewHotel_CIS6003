@@ -20,7 +20,7 @@ public class RoomAvailabilityServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // CHANGE THIS: Instead of DataStore, use the DAO to get real DB data
+
         List<Room> rooms = RoomDAO.getAllRooms();
 
         request.setAttribute("rooms", rooms);
